@@ -2,35 +2,35 @@ import { CommandModule } from "yargs";
 import { getAuthToken } from "../../util/getAuthToken";
 import { ERROR_MESSAGES } from "../../util/errors";
 import { getApiClient } from "../../util/getClient";
-import { Region, ResponseError } from "../../../sdk-client";
+import { ResponseError } from "../../../sdk-client";
 
-export const roomCreateCommand: CommandModule<
+export const roomConnectionInfoCommand: CommandModule<
 	{},
-	{ appId: string; region?: Region }
+	{ appId: string; roomId: string }
 > = {
-	command: "room create",
-	describe: "Create a new room",
+	command: "room connect",
+	describe: "Connect to a room",
 	builder: {
 		appId: {
 			type: "string",
 			demandOption: true,
 			describe: "Id of the app",
 		},
-		region: {
+		roomId: {
 			type: "string",
-			describe: "Region to create the room in",
-			choices: Object.values(Region),
+			demandOption: true,
+			describe: "Id of the room",
 		},
 	},
 	handler: async (args) => {
 		const authenticationToken = await getAuthToken();
 		const client = getApiClient(authenticationToken);
 		try {
-			const room = await client.createRoom({
+			const connectionInfo = await client.getConnectionInfo({
 				appId: args.appId,
-				region: args.region,
+				roomId: args.roomId,
 			});
-			console.log(room);
+			console.log(connectionInfo);
 		} catch (e) {
 			if (e instanceof ResponseError) {
 				ERROR_MESSAGES.RESPONSE_ERROR(
