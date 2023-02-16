@@ -2,28 +2,35 @@ import { CommandModule } from "yargs";
 import { getAuthToken } from "../../util/getAuthToken";
 import { ERROR_MESSAGES } from "../../util/errors";
 import { getApiClient } from "../../util/getClient";
-import { ResponseError } from "../../../sdk-client";
+import { Region, ResponseError } from "../../../sdk-client";
 
-export const appCreateCommand: CommandModule<{}, { appName: string }> = {
-	command: "app create",
-	describe: "Create a new app",
+export const roomCreateCommand: CommandModule<
+	{},
+	{ appId: string; region?: Region }
+> = {
+	command: "room create",
+	describe: "Create a new room",
 	builder: {
-		appName: {
+		appId: {
 			type: "string",
 			demandOption: true,
 			describe: "Name of the app",
+		},
+		region: {
+			type: "string",
+			describe: "Region to create the room in",
+			choices: Object.values(Region),
 		},
 	},
 	handler: async (args) => {
 		const authenticationToken = await getAuthToken();
 		const client = getApiClient(authenticationToken);
 		try {
-			const response = await client.createApp({
-				createAppRequest: {
-					appName: args.appName,
-				},
+			const room = await client.createRoom({
+				appId: args.appId,
+				region: args.region,
 			});
-			console.log(response);
+			console.log(room);
 		} catch (e) {
 			if (e instanceof ResponseError) {
 				ERROR_MESSAGES.RESPONSE_ERROR(

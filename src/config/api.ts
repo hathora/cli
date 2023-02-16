@@ -1,1 +1,1 @@
-export const API_BASE = "https://hathora-api.fly.dev/v2";
+export const API_BASE = "https://api.hathora.io/v2";

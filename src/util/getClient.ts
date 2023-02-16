@@ -1,5 +1,7 @@
 import fetch, { Headers, Request, Response } from "node-fetch";
-
+import FormData from "form-data";
+// @ts-expect-error
+globalThis.FormData = FormData;
 if (!globalThis.fetch) {
 	globalThis.fetch = fetch as any;
 	globalThis.Headers = Headers as any;
