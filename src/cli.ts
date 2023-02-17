@@ -18,6 +18,10 @@ import { roomCreateCommand } from "./commands/room/create";
 import { roomConnectionInfoCommand } from "./commands/room/connect";
 
 import { logAllCommand } from "./commands/log";
+import { logDeploymentCommand } from "./commands/deployments/log";
+import { logProcessCommand } from "./commands/processes/log";
+import { listDeploymentsCommand } from "./commands/deployments/list";
+import { listProcessesCommand } from "./commands/processes/list";
 
 yargs(hideBin(process.argv))
 	.scriptName("hathora")
@@ -31,5 +35,9 @@ yargs(hideBin(process.argv))
 	.command(roomConnectionInfoCommand)
 	.command(roomCreateCommand)
 	.command(logAllCommand)
+	.command(logDeploymentCommand)
+	.command(logProcessCommand)
+	.command(listDeploymentsCommand)
+	.command(listProcessesCommand)
 	.help()
 	.parse();
