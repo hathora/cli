@@ -2,20 +2,10 @@ import { CommandModule } from "yargs";
 import { getAuthToken } from "../util/getAuthToken";
 import { ERROR_MESSAGES } from "../util/errors";
 import { getApiClient } from "../util/getClient";
-import { ResponseError, DeploymentConfig } from "../../sdk-client";
-import { readFile, stat } from "fs/promises";
-import { Blob } from "node-fetch";
+import { ResponseError } from "../../sdk-client";
+import { stat } from "fs/promises";
 import { createReadStream } from "fs";
-function loadDeploymentConfig(): DeploymentConfig {
-	// TODO: load from file
-	return {
-		env: [],
-		roomsPerProcess: 3,
-		planName: "medium",
-		transportType: "tls",
-		containerPort: 4000,
-	};
-}
+
 export const deployCommand: CommandModule<
 	{},
 	{
@@ -74,8 +64,8 @@ export const deployCommand: CommandModule<
 			if (!(await stat(args.file)).isFile()) {
 				return ERROR_MESSAGES.FILE_NOT_FOUND(args.file);
 			}
+
 			const fileContents = createReadStream(args.file);
-			// const b = new Blob([fileContents]);
 			const buildResponse = await client.runBuildRaw({
 				appId: args.appId,
 				buildId: response.buildId,
