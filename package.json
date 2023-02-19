@@ -14,6 +14,7 @@
 		"@types/fs-extra": "^11.0.1",
 		"@types/node": "^18.13.0",
 		"@types/prompts": "^2.4.2",
+		"@types/tar": "^6.1.4",
 		"@types/yargs": "^17.0.22",
 		"esbuild": "^0.17.6",
 		"esbuild-plugin-node-externals": "^1.0.1",
@@ -31,6 +32,7 @@
 		"open": "^8.4.1",
 		"openid-client": "^5.4.0",
 		"prompts": "^2.4.2",
+		"tar": "^6.1.13",
 		"yargs": "^17.6.2"
 	},
 	"bin": {

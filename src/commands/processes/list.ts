@@ -44,7 +44,7 @@ export const listProcessesCommand: CommandModule<
 			type: "string",
 			demandOption: false,
 			describe: "Show only the specified fields (comma separated)",
-			default: "deploymentId,createdAt,createdBy,buildId",
+			default: "processId,deploymentId,region,activeConnections",
 		},
 	},
 	handler: async (args) => {

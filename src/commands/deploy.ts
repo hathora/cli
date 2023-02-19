@@ -5,6 +5,7 @@ import { getApiClient } from "../util/getClient";
 import { ResponseError } from "../../sdk-client";
 import { stat } from "fs/promises";
 import { createReadStream } from "fs";
+import { createTar } from "../util/createTar";
 
 export const deployCommand: CommandModule<
 	{},
@@ -27,7 +28,6 @@ export const deployCommand: CommandModule<
 		},
 		file: {
 			type: "string",
-			demandOption: true,
 			describe: "path to the tgz archive to deploy",
 		},
 		roomsPerProcess: {
@@ -61,15 +61,17 @@ export const deployCommand: CommandModule<
 				appId: args.appId,
 			});
 
-			if (!(await stat(args.file)).isFile()) {
+			if (args.file && !(await stat(args.file)).isFile()) {
 				return ERROR_MESSAGES.FILE_NOT_FOUND(args.file);
 			}
 
-			const fileContents = createReadStream(args.file);
+			const fileContents =
+				args.file === undefined ? createTar() : createReadStream(args.file);
 			const buildResponse = await client.runBuildRaw({
 				appId: args.appId,
 				buildId: response.buildId,
-				file: fileContents as any,
+				// @ts-expect-error
+				file: fileContents, // readable stream works with the form-data package but the generated sdk wants a blob.
 			});
 			let body = buildResponse.raw.body!;
 			body["pipe"](process.stdout);

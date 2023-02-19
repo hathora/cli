@@ -8,8 +8,8 @@ export const roomConnectionInfoCommand: CommandModule<
 	{},
 	{ appId: string; roomId: string }
 > = {
-	command: "room connect",
-	describe: "Connect to a room",
+	command: "room connection-info",
+	describe: "get information about a room",
 	builder: {
 		appId: {
 			type: "string",

@@ -12,6 +12,8 @@ export const logAllCommand: CommandModule<
 		timestamps: boolean | undefined;
 		tailLines: number | undefined;
 		region: Region | undefined;
+		processId: string | undefined;
+		deploymentId: string | undefined;
 	}
 > = {
 	command: "logs",
@@ -43,18 +45,42 @@ export const logAllCommand: CommandModule<
 			choices: Object.values(Region),
 			describe: "region",
 		},
+		processId: {
+			type: "string",
+			demandOption: false,
+			describe: "Id of the process (exclusive with deploymentId)",
+		},
+		deploymentId: {
+			type: "number",
+			demandOption: false,
+			describe: "Id of the deployment (exclusive with processId)",
+		},
 	},
 	handler: async (args) => {
 		const authenticationToken = await getAuthToken();
 		const client = getApiClient(authenticationToken);
 		try {
-			let respone = await client.getAllLogsRaw({
+			let fn:
+				| typeof client.getAllLogsRaw
+				| typeof client.getLogsForDeploymentRaw
+				| typeof client.getLogsForProcessRaw =
+				client.getAllLogsRaw.bind(client);
+
+			let request: any = {
 				appId: args.appId,
 				follow: args.follow,
 				timestamps: args.timestamps,
 				tailLines: args.tailLines,
 				region: args.region,
-			});
+			};
+			if (args.processId !== undefined) {
+				fn = client.getLogsForProcessRaw.bind(client);
+				request.processId = args.processId;
+			} else if (args.deploymentId !== undefined) {
+				fn = client.getLogsForDeploymentRaw.bind(client);
+				request.deploymentId = args.deploymentId;
+			}
+			let respone = await fn(request);
 
 			let body = respone.raw.body!;
 			body["pipe"](process.stdout);
