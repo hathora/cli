@@ -14,7 +14,7 @@ export const createBuildCommand: CommandModule<
 		file: string;
 	}
 > = {
-	command: "deployments list",
+	command: "build create",
 	describe: "list deployments for an app",
 	builder: {
 		appId: {
