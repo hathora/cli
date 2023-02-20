@@ -9,7 +9,7 @@ export const roomConnectionInfoCommand: CommandModule<
 	{ appId: string; roomId: string }
 > = {
 	command: "room connection-info",
-	describe: "get information about a room",
+	describe: "get connection info for a room",
 	builder: {
 		appId: {
 			type: "string",

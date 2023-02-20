@@ -15,7 +15,7 @@ export const listProcessesCommand: CommandModule<
 	}
 > = {
 	command: "processes list",
-	describe: "list deployments for an app",
+	describe: "list processes for an app",
 	builder: {
 		appId: {
 			type: "string",

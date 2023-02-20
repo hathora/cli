@@ -17,7 +17,7 @@ export const logAllCommand: CommandModule<
 	}
 > = {
 	command: "logs",
-	describe: "create a deployment for an app",
+	describe: "view logs for an app/deployment/process",
 	builder: {
 		appId: {
 			type: "string",
