@@ -8,7 +8,7 @@ export const roomCreateCommand: CommandModule<
 	{},
 	{ appId: string; region?: Region }
 > = {
-	command: "room create",
+	command: "create",
 	describe: "Create a new room",
 	builder: {
 		appId: {

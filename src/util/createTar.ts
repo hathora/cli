@@ -1,11 +1,13 @@
 import { findUp } from "./findUp";
 import tar from "tar";
-export function createTar() {
+import { Readable } from "stream";
+export async function createTar() {
 	const rootDir = findUp("hathora.yml");
 	if (!rootDir) {
 		throw new Error("Could not find hathora.yml");
 	}
-	return tar.create(
+	// @ts-ignore
+	tar.create(
 		{
 			cwd: rootDir,
 			gzip: true,

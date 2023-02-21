@@ -2,7 +2,7 @@ import { CommandModule } from "yargs";
 import { getAuthToken } from "../../util/getAuthToken";
 import { ERROR_MESSAGES } from "../../util/errors";
 import { getApiClient } from "../../util/getClient";
-import { Deployment, Region, ResponseError } from "../../../sdk-client";
+import { Region, ResponseError } from "../../../sdk-client";
 
 export const listProcessesCommand: CommandModule<
 	{},
@@ -14,7 +14,7 @@ export const listProcessesCommand: CommandModule<
 		fields: string;
 	}
 > = {
-	command: "processes list",
+	command: "list",
 	describe: "list processes for an app",
 	builder: {
 		appId: {
