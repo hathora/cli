@@ -13,7 +13,6 @@ export async function createTar() {
 	const tempDir = await mkdtemp(`${tmpDir}${sep}`);
 	const fileLocation = join(tempDir, "bundle.tgz");
 	const outputStream = createWriteStream(fileLocation);
-	console.log(fileLocation);
 	tar
 		.create(
 			{
