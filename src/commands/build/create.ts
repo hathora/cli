@@ -40,7 +40,9 @@ export const createBuildCommand: CommandModule<
 			}
 
 			const fileContents =
-				args.file === undefined ? createTar() : createReadStream(args.file);
+				args.file === undefined
+					? await createTar()
+					: createReadStream(args.file);
 			const buildResponse = await client.runBuildRaw({
 				appId: args.appId,
 				buildId: response.buildId,
