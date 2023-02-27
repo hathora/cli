@@ -13,7 +13,7 @@ export const listDeploymentsCommand: CommandModule<
 		fields: string;
 	}
 > = {
-	command: "deployments list",
+	command: "list",
 	describe: "list deployments for an app",
 	builder: {
 		appId: {

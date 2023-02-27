@@ -5,7 +5,7 @@ export const buildCommand: CommandModule<{}, any> = {
 	command: "builds [subcommand]",
 	describe: "Manage or create builds",
 	builder(yargs) {
-		return yargs.command(createBuildCommand);
+		return yargs.command(createBuildCommand).help();
 	},
 	handler: () => {},
 };

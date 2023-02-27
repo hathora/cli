@@ -8,7 +8,8 @@ export const deploymentsCommand: CommandModule<{}, any> = {
 	builder(yargs) {
 		return yargs
 			.command(createDeploymentCommand)
-			.command(listDeploymentsCommand);
+			.command(listDeploymentsCommand)
+			.help();
 	},
 	handler: () => {},
 };
