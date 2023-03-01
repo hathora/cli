@@ -11,10 +11,12 @@ import esbuildPluginNodeExternals from "esbuild-plugin-node-externals";
 		outfile: "dist/cli.js",
 		platform: "node",
 		target: "node14",
-		plugins: [esbuildPluginNodeExternals()],
+		plugins: [],
+		metafile: true,
 		banner: {
 			js: "#!/usr/bin/env node",
 		},
+		minify: !isDev,
 	};
 
 	if (isDev) {
@@ -22,6 +24,8 @@ import esbuildPluginNodeExternals from "esbuild-plugin-node-externals";
 
 		context.watch();
 	} else {
-		await esbuild.build(config);
+		await esbuild.build(config).then(async (res) => {
+			console.log(await esbuild.analyzeMetafile(res.metafile!));
+		});
 	}
 })();

@@ -21,7 +21,7 @@ import { deploymentsCommand } from "./commands/deployments";
 import { buildCommand } from "./commands/build";
 
 yargs(hideBin(process.argv))
-	.scriptName("hathora")
+	.scriptName("hathora-cloud")
 	.demandCommand()
 	.recommendCommands()
 	.completion()
