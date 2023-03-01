@@ -1,15 +1,15 @@
 import yargs from "yargs";
 import { hideBin } from "yargs/helpers";
 
-// hathora login
+// hathora-cloud login
 
 import { loginCommand } from "./commands/login";
 
-// hathora list deployments --appId 123
+// hathora-cloud list deployments --appId 123
 
 import { appCreateCommand } from "./commands/app/create";
 
-// hathora deploy --appId 123 --file ./test.zip
+// hathora-cloud deploy --appId 123 --file ./test.zip
 
 import { deployCommand } from "./commands/deploy";
 

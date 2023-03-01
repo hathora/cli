@@ -21,6 +21,9 @@ export const appCreateCommand: CommandModule<{}, { appName: string }> = {
 			const response = await client.createApp({
 				createAppRequest: {
 					appName: args.appName,
+					authConfiguration: {
+						anonymous: {},
+					},
 				},
 			});
 			console.log(response);

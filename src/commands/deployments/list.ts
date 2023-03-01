@@ -2,7 +2,7 @@ import { CommandModule } from "yargs";
 import { getAuthToken } from "../../util/getAuthToken";
 import { ERROR_MESSAGES } from "../../util/errors";
 import { getApiClient } from "../../util/getClient";
-import { Deployment, ResponseError } from "../../../sdk-client";
+import { ResponseError } from "../../../sdk-client";
 
 export const listDeploymentsCommand: CommandModule<
 	{},

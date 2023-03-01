@@ -7,13 +7,13 @@ The hathora cli is a utility for interacting with the hathora api to create and 
 ## Installation
 
 ```bash
-npm i -g hathora
+npm i -g @hathora/cli
 ```
 
 or with yarn
 
 ```bash
-yarn global add hathora
+yarn global add @hathora/cli
 ```
 
 ## Usage
@@ -25,18 +25,18 @@ hathora [command] <options>
 ## Commands
 
 ```
-Usage: hathora <command> [options]
+Usage: hathora-cloud <command> [options]
 
 Commands:
-  hathora completion                generate completion script
-  hathora login                     Login to Hathora Cloud          [aliases: l]
-  hathora app create                Create a new app
-  hathora deploy                    create a deployment for an app
-  hathora logs                      view logs for an app/deployment/process
-  hathora processes [subcommand]    Manage a specific process
-  hathora deployments [subcommand]  Manage or create deployments
-  hathora builds [subcommand]       Manage or create builds
-  hathora room [subcommand]         manage or create rooms
+  hathora-cloud completion                generate completion script
+  hathora-cloud login                     Login to Hathora Cloud          [aliases: l]
+  hathora-cloud app create                Create a new app
+  hathora-cloud deploy                    create a deployment for an app
+  hathora-cloud logs                      view logs for an app/deployment/process
+  hathora-cloud processes [subcommand]    Manage a specific process
+  hathora-cloud deployments [subcommand]  Manage or create deployments
+  hathora-cloud builds [subcommand]       Manage or create builds
+  hathora-cloud room [subcommand]         manage or create rooms
 
 Options:
   --version  Show version number                                       [boolean]

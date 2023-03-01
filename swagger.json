@@ -39,22 +39,14 @@
 									"$ref": "#/components/schemas/Region"
 								}
 							},
-							"required": [
-								"containerTag",
-								"region"
-							],
+							"required": ["containerTag", "region"],
 							"type": "object"
 						},
 						"type": "array"
 					},
 					"status": {
 						"type": "string",
-						"enum": [
-							"created",
-							"running",
-							"succeeded",
-							"failed"
-						]
+						"enum": ["created", "running", "succeeded", "failed"]
 					},
 					"finishedAt": {
 						"type": "string",
@@ -92,20 +84,11 @@
 			},
 			"TransportType": {
 				"type": "string",
-				"enum": [
-					"tcp",
-					"udp",
-					"tls"
-				]
+				"enum": ["tcp", "udp", "tls"]
 			},
 			"PlanName": {
 				"type": "string",
-				"enum": [
-					"tiny",
-					"small",
-					"medium",
-					"large"
-				]
+				"enum": ["tiny", "small", "medium", "large"]
 			},
 			"Deployment": {
 				"properties": {
@@ -134,10 +117,7 @@
 									"type": "string"
 								}
 							},
-							"required": [
-								"value",
-								"name"
-							],
+							"required": ["value", "name"],
 							"type": "object"
 						},
 						"type": "array"
@@ -194,10 +174,7 @@
 									"type": "string"
 								}
 							},
-							"required": [
-								"value",
-								"name"
-							],
+							"required": ["value", "name"],
 							"type": "object"
 						},
 						"type": "array"
@@ -245,12 +222,7 @@
 						"$ref": "#/components/schemas/RoomId"
 					}
 				},
-				"required": [
-					"transportType",
-					"port",
-					"host",
-					"roomId"
-				],
+				"required": ["transportType", "port", "host", "roomId"],
 				"type": "object"
 			},
 			"RoomAllocationId": {
@@ -287,12 +259,7 @@
 			},
 			"RoomStatus": {
 				"type": "string",
-				"enum": [
-					"scheduling",
-					"active",
-					"suspended",
-					"destroyed"
-				]
+				"enum": ["scheduling", "active", "suspended", "destroyed"]
 			},
 			"Room": {
 				"properties": {
@@ -349,12 +316,7 @@
 						"nullable": true
 					}
 				},
-				"required": [
-					"appId",
-					"roomId",
-					"status",
-					"currentAllocation"
-				],
+				"required": ["appId", "roomId", "status", "currentAllocation"],
 				"type": "object",
 				"description": "From T, pick a set of properties whose keys are in the union K"
 			},
@@ -379,10 +341,7 @@
 					},
 					"visibility": {
 						"type": "string",
-						"enum": [
-							"private",
-							"public"
-						]
+						"enum": ["private", "public"]
 					},
 					"region": {
 						"$ref": "#/components/schemas/Region"
@@ -503,10 +462,7 @@
 								"format": "double"
 							}
 						},
-						"required": [
-							"rooms",
-							"totalRooms"
-						],
+						"required": ["rooms", "totalRooms"],
 						"type": "object"
 					}
 				]
@@ -535,9 +491,7 @@
 										"type": "string"
 									}
 								},
-								"required": [
-									"clientId"
-								],
+								"required": ["clientId"],
 								"type": "object"
 							},
 							"nickname": {
@@ -584,12 +538,49 @@
 								"$ref": "#/components/schemas/Deployment"
 							}
 						},
-						"required": [
-							"deployment"
-						],
+						"required": ["deployment"],
 						"type": "object"
 					}
 				]
+			},
+			"MetricValue": {
+				"properties": {
+					"value": {
+						"type": "number",
+						"format": "double"
+					},
+					"timestamp": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": ["value", "timestamp"],
+				"type": "object"
+			},
+			"Record_Partial_MetricName_.MetricValue-Array_": {
+				"properties": {
+					"cpu": {
+						"items": {
+							"$ref": "#/components/schemas/MetricValue"
+						},
+						"type": "array"
+					},
+					"memory": {
+						"items": {
+							"$ref": "#/components/schemas/MetricValue"
+						},
+						"type": "array"
+					}
+				},
+				"type": "object",
+				"description": "Construct a type with a set of properties K of type T"
+			},
+			"MetricsResponse": {
+				"$ref": "#/components/schemas/Record_Partial_MetricName_.MetricValue-Array_"
+			},
+			"MetricName": {
+				"type": "string",
+				"enum": ["cpu", "memory"]
 			}
 		},
 		"securitySchemes": {
@@ -621,9 +612,7 @@
 											"type": "string"
 										}
 									},
-									"required": [
-										"token"
-									],
+									"required": ["token"],
 									"type": "object"
 								}
 							}
@@ -667,9 +656,7 @@
 											"type": "string"
 										}
 									},
-									"required": [
-										"token"
-									],
+									"required": ["token"],
 									"type": "object"
 								}
 							}
@@ -707,9 +694,7 @@
 										"type": "string"
 									}
 								},
-								"required": [
-									"nickname"
-								],
+								"required": ["nickname"],
 								"type": "object"
 							}
 						}
@@ -731,9 +716,7 @@
 											"type": "string"
 										}
 									},
-									"required": [
-										"token"
-									],
+									"required": ["token"],
 									"type": "object"
 								}
 							}
@@ -781,9 +764,7 @@
 										"type": "string"
 									}
 								},
-								"required": [
-									"idToken"
-								],
+								"required": ["idToken"],
 								"type": "object"
 							}
 						}
@@ -1009,9 +990,7 @@
 										"format": "binary"
 									}
 								},
-								"required": [
-									"file"
-								]
+								"required": ["file"]
 							}
 						}
 					}
@@ -1824,15 +1803,6 @@
 					},
 					{
 						"in": "query",
-						"name": "timestamps",
-						"required": false,
-						"schema": {
-							"default": false,
-							"type": "boolean"
-						}
-					},
-					{
-						"in": "query",
 						"name": "tailLines",
 						"required": false,
 						"schema": {
@@ -1911,15 +1881,6 @@
 					},
 					{
 						"in": "query",
-						"name": "timestamps",
-						"required": false,
-						"schema": {
-							"default": false,
-							"type": "boolean"
-						}
-					},
-					{
-						"in": "query",
 						"name": "tailLines",
 						"required": false,
 						"schema": {
@@ -1979,15 +1940,6 @@
 					{
 						"in": "query",
 						"name": "follow",
-						"required": false,
-						"schema": {
-							"default": false,
-							"type": "boolean"
-						}
-					},
-					{
-						"in": "query",
-						"name": "timestamps",
 						"required": false,
 						"schema": {
 							"default": false,
@@ -2236,13 +2188,31 @@
 						"application/json": {
 							"schema": {
 								"properties": {
+									"authConfiguration": {
+										"properties": {
+											"google": {
+												"properties": {
+													"clientId": {
+														"type": "string"
+													}
+												},
+												"required": ["clientId"],
+												"type": "object"
+											},
+											"nickname": {
+												"$ref": "#/components/schemas/Record_string.never_"
+											},
+											"anonymous": {
+												"$ref": "#/components/schemas/Record_string.never_"
+											}
+										},
+										"type": "object"
+									},
 									"appName": {
 										"type": "string"
 									}
 								},
-								"required": [
-									"appName"
-								],
+								"required": ["authConfiguration", "appName"],
 								"type": "object"
 							}
 						}
@@ -2326,11 +2296,111 @@
 					}
 				]
 			}
+		},
+		"/metrics/{appId}/process/{processId}": {
+			"get": {
+				"operationId": "GetMetrics",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/MetricsResponse"
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string"
+								}
+							}
+						}
+					}
+				},
+				"security": [
+					{
+						"auth0": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "appId",
+						"required": true,
+						"schema": {
+							"$ref": "#/components/schemas/AppId"
+						}
+					},
+					{
+						"in": "path",
+						"name": "processId",
+						"required": true,
+						"schema": {
+							"$ref": "#/components/schemas/ProcessId"
+						}
+					},
+					{
+						"in": "query",
+						"name": "metrics",
+						"required": false,
+						"schema": {
+							"default": ["cpu", "memory"],
+							"type": "array",
+							"items": {
+								"$ref": "#/components/schemas/MetricName"
+							}
+						}
+					},
+					{
+						"in": "query",
+						"name": "end",
+						"required": false,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"in": "query",
+						"name": "start",
+						"required": false,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"in": "query",
+						"name": "step",
+						"required": false,
+						"schema": {
+							"default": 60,
+							"format": "double",
+							"type": "number"
+						}
+					}
+				]
+			}
 		}
 	},
 	"servers": [
 		{
-			"url": "http://localhost:8080/v2"
+			"url": "/v2"
 		}
 	]
 }
