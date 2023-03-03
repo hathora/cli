@@ -1,5 +1,4 @@
 import esbuild from "esbuild";
-import esbuildPluginNodeExternals from "esbuild-plugin-node-externals";
 
 (async () => {
 	const isDev =
