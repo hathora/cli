@@ -8,7 +8,6 @@ export const listDeploymentsCommand: CommandModule<
 	{},
 	{
 		appId: string;
-		limit: number | undefined;
 		raw: boolean | undefined;
 		fields: string;
 	}
@@ -20,11 +19,6 @@ export const listDeploymentsCommand: CommandModule<
 			type: "string",
 			demandOption: true,
 			describe: "Id of the app",
-		},
-		limit: {
-			type: "number",
-			demandOption: false,
-			describe: "Limit the number of deployments returned",
 		},
 		raw: {
 			type: "boolean",
@@ -44,7 +38,6 @@ export const listDeploymentsCommand: CommandModule<
 		try {
 			let response = await client.getDeployments({
 				appId: args.appId,
-				limit: args.limit,
 			});
 			if (args.raw) {
 				console.log(response);

@@ -44,11 +44,25 @@
 						},
 						"type": "array"
 					},
+					"imageSize": {
+						"type": "number",
+						"format": "double"
+					},
 					"status": {
 						"type": "string",
 						"enum": ["created", "running", "succeeded", "failed"]
 					},
+					"deletedAt": {
+						"type": "string",
+						"format": "date-time",
+						"nullable": true
+					},
 					"finishedAt": {
+						"type": "string",
+						"format": "date-time",
+						"nullable": true
+					},
+					"startedAt": {
 						"type": "string",
 						"format": "date-time",
 						"nullable": true
@@ -69,8 +83,11 @@
 				},
 				"required": [
 					"regionalContainerTags",
+					"imageSize",
 					"status",
+					"deletedAt",
 					"finishedAt",
+					"startedAt",
 					"createdAt",
 					"createdBy",
 					"buildId",
@@ -467,6 +484,45 @@
 					}
 				]
 			},
+			"MetricValue": {
+				"properties": {
+					"value": {
+						"type": "number",
+						"format": "double"
+					},
+					"timestamp": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": ["value", "timestamp"],
+				"type": "object"
+			},
+			"Record_Partial_MetricName_.MetricValue-Array_": {
+				"properties": {
+					"cpu": {
+						"items": {
+							"$ref": "#/components/schemas/MetricValue"
+						},
+						"type": "array"
+					},
+					"memory": {
+						"items": {
+							"$ref": "#/components/schemas/MetricValue"
+						},
+						"type": "array"
+					}
+				},
+				"type": "object",
+				"description": "Construct a type with a set of properties K of type T"
+			},
+			"MetricsResponse": {
+				"$ref": "#/components/schemas/Record_Partial_MetricName_.MetricValue-Array_"
+			},
+			"MetricName": {
+				"type": "string",
+				"enum": ["cpu", "memory"]
+			},
 			"Record_string.never_": {
 				"properties": {},
 				"type": "object",
@@ -542,45 +598,6 @@
 						"type": "object"
 					}
 				]
-			},
-			"MetricValue": {
-				"properties": {
-					"value": {
-						"type": "number",
-						"format": "double"
-					},
-					"timestamp": {
-						"type": "number",
-						"format": "double"
-					}
-				},
-				"required": ["value", "timestamp"],
-				"type": "object"
-			},
-			"Record_Partial_MetricName_.MetricValue-Array_": {
-				"properties": {
-					"cpu": {
-						"items": {
-							"$ref": "#/components/schemas/MetricValue"
-						},
-						"type": "array"
-					},
-					"memory": {
-						"items": {
-							"$ref": "#/components/schemas/MetricValue"
-						},
-						"type": "array"
-					}
-				},
-				"type": "object",
-				"description": "Construct a type with a set of properties K of type T"
-			},
-			"MetricsResponse": {
-				"$ref": "#/components/schemas/Record_Partial_MetricName_.MetricValue-Array_"
-			},
-			"MetricName": {
-				"type": "string",
-				"enum": ["cpu", "memory"]
 			}
 		},
 		"securitySchemes": {
@@ -813,16 +830,6 @@
 						"schema": {
 							"$ref": "#/components/schemas/AppId"
 						}
-					},
-					{
-						"in": "query",
-						"name": "limit",
-						"required": false,
-						"schema": {
-							"default": 10,
-							"format": "double",
-							"type": "number"
-						}
 					}
 				]
 			}
@@ -887,6 +894,16 @@
 							"application/json": {
 								"schema": {
 									"$ref": "#/components/schemas/Build"
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string"
 								}
 							}
 						}
@@ -997,6 +1014,59 @@
 				}
 			}
 		},
+		"/builds/{appId}/delete/{buildId}": {
+			"delete": {
+				"operationId": "DeleteBuild",
+				"responses": {
+					"204": {
+						"description": "No content"
+					},
+					"400": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string"
+								}
+							}
+						}
+					}
+				},
+				"security": [
+					{
+						"auth0": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "appId",
+						"required": true,
+						"schema": {
+							"$ref": "#/components/schemas/AppId"
+						}
+					},
+					{
+						"in": "path",
+						"name": "buildId",
+						"required": true,
+						"schema": {
+							"$ref": "#/components/schemas/BuildId"
+						}
+					}
+				]
+			}
+		},
 		"/deployments/{appId}/list": {
 			"get": {
 				"operationId": "GetDeployments",
@@ -1037,16 +1107,6 @@
 						"required": true,
 						"schema": {
 							"$ref": "#/components/schemas/AppId"
-						}
-					},
-					{
-						"in": "query",
-						"name": "limit",
-						"required": false,
-						"schema": {
-							"default": 10,
-							"format": "double",
-							"type": "number"
 						}
 					}
 				]
@@ -2115,6 +2175,106 @@
 				]
 			}
 		},
+		"/metrics/{appId}/process/{processId}": {
+			"get": {
+				"operationId": "GetMetrics",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/MetricsResponse"
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string"
+								}
+							}
+						}
+					}
+				},
+				"security": [
+					{
+						"auth0": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "appId",
+						"required": true,
+						"schema": {
+							"$ref": "#/components/schemas/AppId"
+						}
+					},
+					{
+						"in": "path",
+						"name": "processId",
+						"required": true,
+						"schema": {
+							"$ref": "#/components/schemas/ProcessId"
+						}
+					},
+					{
+						"in": "query",
+						"name": "metrics",
+						"required": false,
+						"schema": {
+							"default": ["cpu", "memory"],
+							"type": "array",
+							"items": {
+								"$ref": "#/components/schemas/MetricName"
+							}
+						}
+					},
+					{
+						"in": "query",
+						"name": "end",
+						"required": false,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"in": "query",
+						"name": "start",
+						"required": false,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"in": "query",
+						"name": "step",
+						"required": false,
+						"schema": {
+							"default": 60,
+							"format": "double",
+							"type": "number"
+						}
+					}
+				]
+			}
+		},
 		"/apps/list": {
 			"get": {
 				"operationId": "GetApps",
@@ -2292,106 +2452,6 @@
 						"required": true,
 						"schema": {
 							"$ref": "#/components/schemas/AppId"
-						}
-					}
-				]
-			}
-		},
-		"/metrics/{appId}/process/{processId}": {
-			"get": {
-				"operationId": "GetMetrics",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/MetricsResponse"
-								}
-							}
-						}
-					},
-					"400": {
-						"description": "",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "string"
-								}
-							}
-						}
-					},
-					"404": {
-						"description": "",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "string"
-								}
-							}
-						}
-					}
-				},
-				"security": [
-					{
-						"auth0": []
-					}
-				],
-				"parameters": [
-					{
-						"in": "path",
-						"name": "appId",
-						"required": true,
-						"schema": {
-							"$ref": "#/components/schemas/AppId"
-						}
-					},
-					{
-						"in": "path",
-						"name": "processId",
-						"required": true,
-						"schema": {
-							"$ref": "#/components/schemas/ProcessId"
-						}
-					},
-					{
-						"in": "query",
-						"name": "metrics",
-						"required": false,
-						"schema": {
-							"default": ["cpu", "memory"],
-							"type": "array",
-							"items": {
-								"$ref": "#/components/schemas/MetricName"
-							}
-						}
-					},
-					{
-						"in": "query",
-						"name": "end",
-						"required": false,
-						"schema": {
-							"format": "double",
-							"type": "number"
-						}
-					},
-					{
-						"in": "query",
-						"name": "start",
-						"required": false,
-						"schema": {
-							"format": "double",
-							"type": "number"
-						}
-					},
-					{
-						"in": "query",
-						"name": "step",
-						"required": false,
-						"schema": {
-							"default": 60,
-							"format": "double",
-							"type": "number"
 						}
 					}
 				]

@@ -1,8 +1,11 @@
 {
 	"name": "@hathora/cli",
 	"version": "1.0.0",
-	"main": "index.js",
 	"license": "MIT",
+	"files": [
+		"dist",
+		"READEME.md"
+	],
 	"scripts": {
 		"build:dev": "yarn generate:sdk-client && ts-node ./scripts/build.ts --dev",
 		"build:prod": "yarn generate:sdk-client && ts-node ./scripts/build.ts",
@@ -38,6 +41,6 @@
 		"yargs": "^17.6.2"
 	},
 	"bin": {
-		"hathora-cloud": "./dist/cli.js"
+		"hathora-cloud": "dist/cli.js"
 	}
 }
