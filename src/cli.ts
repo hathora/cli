@@ -19,8 +19,9 @@ import { logAllCommand } from "./commands/log";
 import { processesCommand } from "./commands/processes";
 import { deploymentsCommand } from "./commands/deployments";
 import { buildCommand } from "./commands/build";
-
+import { version } from "../package.json";
 yargs(hideBin(process.argv))
+	.version(version)
 	.scriptName("hathora-cloud")
 	.demandCommand()
 	.recommendCommands()

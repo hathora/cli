@@ -7,6 +7,7 @@ export const deploymentsCommand: CommandModule<{}, any> = {
 	describe: "Manage or create deployments",
 	builder(yargs) {
 		return yargs
+			.demandCommand(1, "Please specify a subcommand")
 			.command(createDeploymentCommand)
 			.command(listDeploymentsCommand)
 			.help();
