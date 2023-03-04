@@ -9,6 +9,7 @@ export const roomCommand: CommandModule<{}, any> = {
 		return yargs
 			.command(roomCreateCommand)
 			.command(roomConnectionInfoCommand)
+			.demandCommand(1, "Please specify a subcommand")
 			.help();
 	},
 	handler: () => {},

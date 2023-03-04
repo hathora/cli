@@ -5,7 +5,10 @@ export const processesCommand: CommandModule<{}, any> = {
 	command: "processes [subcommand]",
 	describe: "Manage a specific process",
 	builder(yargs) {
-		return yargs.command(listProcessesCommand).help();
+		return yargs
+			.command(listProcessesCommand)
+			.demandCommand(1, "Please specify a subcommand")
+			.help();
 	},
 	handler: () => {},
 };
