@@ -5,7 +5,7 @@ import { getApiClient } from "../../util/getClient";
 import { ResponseError } from "../../../sdk-client";
 
 export const appCreateCommand: CommandModule<{}, { appName: string }> = {
-	command: "app create",
+	command: "create",
 	describe: "Create a new app",
 	builder: {
 		appName: {
