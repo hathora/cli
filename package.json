@@ -33,10 +33,11 @@
 		"commander": "^10.0.0",
 		"form-data": "^4.0.0",
 		"fs-extra": "^11.1.0",
-		"node-fetch": "2",
+		"node-fetch": "^3.3.0",
 		"open": "^8.4.1",
 		"openid-client": "^5.4.0",
 		"prompts": "^2.4.2",
+		"suppress-warnings": "^1.0.2",
 		"tar": "^6.1.13",
 		"yargs": "^17.6.2"
 	},
