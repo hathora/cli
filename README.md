@@ -29,10 +29,11 @@ Usage: hathora-cloud <command> [options]
 
 Commands:
   hathora-cloud completion                generate completion script
-  hathora-cloud login                     Login to Hathora Cloud          [aliases: l]
-  hathora-cloud app create                Create a new app
+  hathora-cloud login                     Login to Hathora Cloud    [aliases: l]
+  hathora-cloud apps [subcommand]         Manage or create apps
   hathora-cloud deploy                    create a deployment for an app
-  hathora-cloud logs                      view logs for an app/deployment/process
+  hathora-cloud logs                      view logs for an app/deployment/proces
+                                          s
   hathora-cloud processes [subcommand]    Manage a specific process
   hathora-cloud deployments [subcommand]  Manage or create deployments
   hathora-cloud builds [subcommand]       Manage or create builds
