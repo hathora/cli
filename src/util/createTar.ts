@@ -5,9 +5,9 @@ import { mkdtemp, unlink } from "fs/promises";
 import { join, sep } from "path";
 import { tmpdir } from "os";
 export async function createTar() {
-	const rootDir = findUp("hathora.yml");
+	const rootDir = findUp("Dockerfile");
 	if (!rootDir) {
-		throw new Error("Could not find hathora.yml");
+		throw new Error("Could not find Dockerfile");
 	}
 	const tmpDir = tmpdir();
 	const tempDir = await mkdtemp(`${tmpDir}${sep}`);
