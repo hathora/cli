@@ -6,7 +6,7 @@ import { Region, ResponseError } from "../../../sdk-client";
 
 export const roomCreateCommand: CommandModule<
 	{},
-	{ appId: string; region?: Region }
+	{ appId: string; region: Region }
 > = {
 	command: "create",
 	describe: "Create a new room",
@@ -18,6 +18,7 @@ export const roomCreateCommand: CommandModule<
 		},
 		region: {
 			type: "string",
+			demandOption: true,
 			describe: "Region to create the room in",
 			choices: Object.values(Region),
 		},
@@ -28,7 +29,7 @@ export const roomCreateCommand: CommandModule<
 		try {
 			const room = await client.createRoom({
 				appId: args.appId,
-				region: args.region,
+				createRoomRequest: { region: args.region },
 			});
 			console.log(room);
 		} catch (e) {
