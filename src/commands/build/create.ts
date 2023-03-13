@@ -31,10 +31,6 @@ export const createBuildCommand: CommandModule<
 		const authenticationToken = await getAuthToken();
 		const client = getApiClient(authenticationToken);
 		try {
-			const response = await client.createBuild({
-				appId: args.appId,
-			});
-
 			if (args.file && !(await stat(args.file)).isFile()) {
 				return ERROR_MESSAGES.FILE_NOT_FOUND(args.file);
 			}
@@ -43,9 +39,13 @@ export const createBuildCommand: CommandModule<
 				args.file === undefined
 					? await createTar()
 					: createReadStream(args.file);
+
+			const createResponse = await client.createBuild({
+				appId: args.appId,
+			});
 			const buildResponse = await client.runBuildRaw({
 				appId: args.appId,
-				buildId: response.buildId,
+				buildId: createResponse.buildId,
 				// @ts-expect-error
 				file: fileContents, // readable stream works with the form-data package but the generated sdk wants a blob.
 			});
