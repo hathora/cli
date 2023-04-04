@@ -15,6 +15,7 @@ export const deployCommand: CommandModule<
 		planName: "tiny" | "small" | "medium" | "large";
 		transportType: "tcp" | "udp" | "tls";
 		containerPort: number;
+		env: string;
 		token: string;
 	}
 > = {
@@ -51,6 +52,12 @@ export const deployCommand: CommandModule<
 			type: "number",
 			demandOption: true,
 			describe: "port the container listens to",
+		},
+		env: {
+			type: "string",
+			demandOption: true,
+			describe:
+				"JSON stringified version of env variables array (name and value)",
 		},
 		token: { type: "string", demandOption: true, hidden: true },
 	},
@@ -89,7 +96,7 @@ export const deployCommand: CommandModule<
 					planName: args.planName,
 					transportType: args.transportType,
 					containerPort: args.containerPort,
-					env: [],
+					env: JSON.parse(args.env),
 				},
 			});
 			console.log(
