@@ -1,5 +1,4 @@
 import { CommandModule } from "yargs";
-import { getAuthToken } from "../util/getAuthToken";
 import { ERROR_MESSAGES } from "../util/errors";
 import { getApiClient } from "../util/getClient";
 import { Region, ResponseError } from "../../sdk-client";
@@ -14,6 +13,7 @@ export const logAllCommand: CommandModule<
 		region: Region | undefined;
 		processId: string | undefined;
 		deploymentId: string | undefined;
+		token: string;
 	}
 > = {
 	command: "logs",
@@ -55,10 +55,10 @@ export const logAllCommand: CommandModule<
 			demandOption: false,
 			describe: "Id of the deployment (exclusive with processId)",
 		},
+		token: { type: "string", demandOption: true, hidden: true },
 	},
 	handler: async (args) => {
-		const authenticationToken = await getAuthToken();
-		const client = getApiClient(authenticationToken);
+		const client = getApiClient(args.token);
 		try {
 			let fn:
 				| typeof client.getLogsForAppRaw

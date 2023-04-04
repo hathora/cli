@@ -1,12 +1,11 @@
 import { CommandModule } from "yargs";
-import { getAuthToken } from "../../util/getAuthToken";
 import { ERROR_MESSAGES } from "../../util/errors";
 import { getApiClient } from "../../util/getClient";
 import { ResponseError } from "../../../sdk-client";
 
 export const roomConnectionInfoCommand: CommandModule<
 	{},
-	{ appId: string; roomId: string }
+	{ appId: string; roomId: string; token: string }
 > = {
 	command: "connection-info",
 	describe: "get connection info for a room",
@@ -21,10 +20,10 @@ export const roomConnectionInfoCommand: CommandModule<
 			demandOption: true,
 			describe: "Id of the room",
 		},
+		token: { type: "string", demandOption: true, hidden: true },
 	},
 	handler: async (args) => {
-		const authenticationToken = await getAuthToken();
-		const client = getApiClient(authenticationToken);
+		const client = getApiClient(args.token);
 		try {
 			const connectionInfo = await client.getConnectionInfo({
 				appId: args.appId,

@@ -1,5 +1,4 @@
 import { CommandModule } from "yargs";
-import { getAuthToken } from "../../util/getAuthToken";
 import { ERROR_MESSAGES } from "../../util/errors";
 import { getApiClient } from "../../util/getClient";
 import { ResponseError } from "../../../sdk-client";
@@ -10,6 +9,7 @@ export const listBuildsCommand: CommandModule<
 		appId: string;
 		raw: boolean | undefined;
 		fields: string;
+		token: string;
 	}
 > = {
 	command: "list",
@@ -31,10 +31,10 @@ export const listBuildsCommand: CommandModule<
 			describe: "Show only the specified fields (comma separated)",
 			default: "buildId,createdAt,createdBy,status",
 		},
+		token: { type: "string", demandOption: true, hidden: true },
 	},
 	handler: async (args) => {
-		const authenticationToken = await getAuthToken();
-		const client = getApiClient(authenticationToken);
+		const client = getApiClient(args.token);
 		try {
 			let response = await client.getBuilds({
 				appId: args.appId,

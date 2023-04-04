@@ -1,12 +1,11 @@
 import { CommandModule } from "yargs";
-import { getAuthToken } from "../../util/getAuthToken";
 import { ERROR_MESSAGES } from "../../util/errors";
 import { getApiClient } from "../../util/getClient";
 import { ResponseError } from "../../../sdk-client";
 
 export const buildDeleteCommand: CommandModule<
 	{},
-	{ appId: string; buildId: number }
+	{ appId: string; buildId: number; token: string }
 > = {
 	command: "delete",
 	describe: "Delete an app",
@@ -21,10 +20,10 @@ export const buildDeleteCommand: CommandModule<
 			demandOption: true,
 			describe: "Build ID",
 		},
+		token: { type: "string", demandOption: true, hidden: true },
 	},
 	handler: async (args) => {
-		const authenticationToken = await getAuthToken();
-		const client = getApiClient(authenticationToken);
+		const client = getApiClient(args.token);
 		try {
 			await client.deleteBuild({
 				appId: args.appId,

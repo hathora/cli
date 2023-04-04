@@ -1,12 +1,11 @@
 import { CommandModule } from "yargs";
-import { getAuthToken } from "../../util/getAuthToken";
 import { ERROR_MESSAGES } from "../../util/errors";
 import { getApiClient } from "../../util/getClient";
 import { Region, ResponseError } from "../../../sdk-client";
 
 export const roomCreateCommand: CommandModule<
 	{},
-	{ appId: string; region: Region }
+	{ appId: string; region: Region; token: string }
 > = {
 	command: "create",
 	describe: "Create a new room",
@@ -22,10 +21,10 @@ export const roomCreateCommand: CommandModule<
 			describe: "Region to create the room in",
 			choices: Object.values(Region),
 		},
+		token: { type: "string", demandOption: true, hidden: true },
 	},
 	handler: async (args) => {
-		const authenticationToken = await getAuthToken();
-		const client = getApiClient(authenticationToken);
+		const client = getApiClient(args.token);
 		try {
 			const room = await client.createRoom({
 				appId: args.appId,

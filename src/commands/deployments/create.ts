@@ -1,5 +1,4 @@
 import { CommandModule } from "yargs";
-import { getAuthToken } from "../../util/getAuthToken";
 import { ERROR_MESSAGES } from "../../util/errors";
 import { getApiClient } from "../../util/getClient";
 import { ResponseError } from "../../../sdk-client";
@@ -13,6 +12,7 @@ export const createDeploymentCommand: CommandModule<
 		transportType: "tcp" | "udp" | "tls";
 		containerPort: number;
 		buildId: number;
+		token: string;
 	}
 > = {
 	command: "create",
@@ -50,10 +50,10 @@ export const createDeploymentCommand: CommandModule<
 			demandOption: true,
 			describe: "port the container listens to",
 		},
+		token: { type: "string", demandOption: true, hidden: true },
 	},
 	handler: async (args) => {
-		const authenticationToken = await getAuthToken();
-		const client = getApiClient(authenticationToken);
+		const client = getApiClient(args.token);
 		try {
 			const deployment = await client.createDeployment({
 				appId: args.appId,

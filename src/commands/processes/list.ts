@@ -1,5 +1,4 @@
 import { CommandModule } from "yargs";
-import { getAuthToken } from "../../util/getAuthToken";
 import { ERROR_MESSAGES } from "../../util/errors";
 import { getApiClient } from "../../util/getClient";
 import { Region, ResponseError } from "../../../sdk-client";
@@ -12,6 +11,7 @@ export const listProcessesCommand: CommandModule<
 		target: "running" | "stopped";
 		raw: boolean | undefined;
 		fields: string;
+		token: string;
 	}
 > = {
 	command: "list",
@@ -46,10 +46,10 @@ export const listProcessesCommand: CommandModule<
 			describe: "Show only the specified fields (comma separated)",
 			default: "processId,deploymentId,region,activeConnections",
 		},
+		token: { type: "string", demandOption: true, hidden: true },
 	},
 	handler: async (args) => {
-		const authenticationToken = await getAuthToken();
-		const client = getApiClient(authenticationToken);
+		const client = getApiClient(args.token);
 		try {
 			const method =
 				args.target === "running"
