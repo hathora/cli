@@ -61,10 +61,10 @@ export const logAllCommand: CommandModule<
 		const client = getApiClient(authenticationToken);
 		try {
 			let fn:
-				| typeof client.getAllLogsRaw
+				| typeof client.getLogsForAppRaw
 				| typeof client.getLogsForDeploymentRaw
 				| typeof client.getLogsForProcessRaw =
-				client.getAllLogsRaw.bind(client);
+				client.getLogsForAppRaw.bind(client);
 
 			let request: any = {
 				appId: args.appId,
