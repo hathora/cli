@@ -6,6 +6,8 @@ The hathora cli is a utility for interacting with the hathora api to create and 
 
 ## Installation
 
+Node v16+ required
+
 ```bash
 npm i -g @hathora/cli
 ```
@@ -19,7 +21,7 @@ yarn global add @hathora/cli
 ## Usage
 
 ```bash
-hathora [command] <options>
+hathora-cloud [command] <options>
 ```
 
 ## Commands
