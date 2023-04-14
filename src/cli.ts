@@ -15,21 +15,23 @@ import { existsSync, readFileSync } from "fs";
 import { homedir } from "os";
 
 const tokenMiddleware: MiddlewareFunction = (argv) => {
-	if (!(argv._[1] === "login" || "token" in argv)) {
-		const tokenFile = join(homedir(), ".config", "hathora", "token");
-		if (!existsSync(tokenFile)) {
-			console.log(
-				chalk.redBright(
-					`Missing token file, run ${chalk.underline(
-						"hathora-cloud login"
-					)} first`
-				)
-			);
-			return;
-		}
-
-		argv.token = readFileSync(tokenFile).toString();
+	if (argv._[0] === "login" || "token" in argv) {
+		return;
 	}
+
+	const tokenFile = join(homedir(), ".config", "hathora", "token");
+	if (!existsSync(tokenFile)) {
+		console.log(
+			chalk.redBright(
+				`Missing token file, run ${chalk.underline(
+					"hathora-cloud login"
+				)} first`
+			)
+		);
+		return;
+	}
+
+	argv.token = readFileSync(tokenFile).toString();
 };
 
 yargs(hideBin(process.argv))
