@@ -4,6 +4,7 @@ import { createReadStream, createWriteStream } from "fs";
 import { mkdtemp, unlink } from "fs/promises";
 import { join, sep } from "path";
 import { tmpdir } from "os";
+
 export async function createTar() {
 	const rootDir = findUp("Dockerfile");
 	if (!rootDir) {
@@ -19,17 +20,11 @@ export async function createTar() {
 				cwd: rootDir,
 				gzip: true,
 				filter: (path) =>
-					!path.startsWith("./api") &&
-					!path.startsWith("./data") &&
-					!path.startsWith("./client") &&
-					!path.includes(".hathora") &&
-					!path.includes("node_modules") &&
-					!path.includes(".git"),
+					!path.includes("node_modules") && !path.includes(".git"),
 			},
 			["."]
 		)
 		.pipe(outputStream);
-	// .pipe(createWriteStream("test.tgz"));
 	return new Promise((resolve, reject) => {
 		outputStream.on("finish", () => {
 			const readStream = createReadStream(fileLocation);
