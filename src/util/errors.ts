@@ -1,4 +1,4 @@
-import chalk from "chalk";
+import * as chalk from "chalk";
 
 type getArgs<T extends string> =
 	// check if it has a %s in it
@@ -15,7 +15,7 @@ function replaceAll(str: string, args: string[]) {
 
 export function errorMessageHandlerFactory<T extends string>(
 	message: T,
-	code: number = 1
+	code = 1
 ) {
 	return (...args: getArgs<T>) => {
 		console.log(chalk.red(replaceAll(message, args)));
@@ -24,7 +24,7 @@ export function errorMessageHandlerFactory<T extends string>(
 }
 export namespace ERROR_MESSAGES {
 	export const NOT_AUTHENTICATED = errorMessageHandlerFactory(
-		"To peform this operation you must first authenticate with Hathora Cloud. Please run `hathora login` to do so."
+		"To perform this operation you must first authenticate with Hathora Cloud. Please run `hathora login` to do so."
 	);
 	export const TOKEN_FILE_NOT_FOUND = errorMessageHandlerFactory(
 		"Token file not found, please run `hathora login` to authenticate."

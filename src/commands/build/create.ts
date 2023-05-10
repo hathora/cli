@@ -1,10 +1,11 @@
 import { CommandModule } from "yargs";
 import { ERROR_MESSAGES } from "../../util/errors";
-import { getApiClient } from "../../util/getClient";
-import { ResponseError } from "../../../sdk-client";
+import { client } from "../../../sdk-client";
 import { stat } from "fs/promises";
-import { createReadStream } from "fs";
+import { createReadStream, ReadStream } from "fs";
 import { createTar } from "../../util/createTar";
+import { readStreamToBytes } from "../../util/readStreamToBytes";
+import { AxiosError } from "axios";
 
 export const createBuildCommand: CommandModule<
 	{},
@@ -29,10 +30,44 @@ export const createBuildCommand: CommandModule<
 		token: { type: "string", demandOption: true, hidden: true },
 	},
 	handler: async (args) => {
-		const client = getApiClient(args.token);
 		try {
 			if (args.file && !(await stat(args.file)).isFile()) {
 				return ERROR_MESSAGES.FILE_NOT_FOUND(args.file);
+			}
+
+			const createResponse = await client.builds.create(
+				{
+					auth0: `Bearer ${args.token}`,
+				},
+				args.appId
+			);
+
+			switch (createResponse.statusCode) {
+				case 201:
+					break;
+				case 404:
+					ERROR_MESSAGES.RESPONSE_ERROR(
+						createResponse.statusCode.toString(),
+						createResponse.createBuild404ApplicationJSONString
+					);
+					break;
+				case 500:
+					ERROR_MESSAGES.RESPONSE_ERROR(
+						createResponse.statusCode.toString(),
+						createResponse.createBuild500ApplicationJSONString
+					);
+					break;
+				case 422:
+					ERROR_MESSAGES.RESPONSE_ERROR(
+						createResponse.statusCode.toString(),
+						createResponse.createBuild422ApplicationJSONString
+					);
+					break;
+				default:
+					ERROR_MESSAGES.RESPONSE_ERROR(
+						createResponse.statusCode.toString(),
+						createResponse.rawResponse?.statusText
+					);
 			}
 
 			const fileContents =
@@ -40,26 +75,46 @@ export const createBuildCommand: CommandModule<
 					? await createTar()
 					: createReadStream(args.file);
 
-			const createResponse = await client.createBuild({
-				appId: args.appId,
-			});
-			const buildResponse = await client.runBuildRaw({
-				appId: args.appId,
-				buildId: createResponse.buildId,
-				// @ts-expect-error
-				file: fileContents, // readable stream works with the form-data package but the generated sdk wants a blob.
-			});
-			let body = buildResponse.raw.body!;
-			body["pipe"](process.stdout);
-			await buildResponse.value();
-		} catch (e) {
-			if (e instanceof ResponseError) {
-				ERROR_MESSAGES.RESPONSE_ERROR(
-					e.response.status.toString(),
-					e.response.statusText
-				);
+			const buildResponse = await client.builds.run(
+				{
+					auth0: `Bearer ${args.token}`,
+				},
+				{
+					file: {
+						file: args.file ?? ((fileContents as ReadStream).path as string),
+						content: await readStreamToBytes(fileContents as ReadStream),
+					},
+				},
+				args.appId,
+				createResponse.build?.buildId
+			);
+
+			switch (buildResponse.statusCode) {
+				case 200:
+					console.log(buildResponse.runBuild200TextPlainByteString);
+					break;
+				case 404:
+					ERROR_MESSAGES.RESPONSE_ERROR(
+						buildResponse.statusCode.toString(),
+						buildResponse.runBuild404ApplicationJSONString
+					);
+					break;
+				case 500:
+					ERROR_MESSAGES.RESPONSE_ERROR(
+						buildResponse.statusCode.toString(),
+						buildResponse.runBuild500ApplicationJSONString
+					);
+					break;
+				default:
+					ERROR_MESSAGES.RESPONSE_ERROR(
+						buildResponse.statusCode.toString(),
+						buildResponse.rawResponse?.statusText
+					);
 			}
-			throw e;
+		} catch (e) {
+			if (e instanceof AxiosError) {
+				ERROR_MESSAGES.UNKNOWN_ERROR(e.message);
+			}
 		}
 	},
 };

@@ -55,7 +55,7 @@ export const listProcessesCommand: CommandModule<
 				args.target === "running"
 					? "getRunningProcesses"
 					: "getStoppedProcesses";
-			let response = await client[method]({
+			const response = await client[method]({
 				appId: args.appId,
 				region: args.region,
 			});

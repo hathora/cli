@@ -1,7 +1,7 @@
 import { CommandModule } from "yargs";
 import { ERROR_MESSAGES } from "../../util/errors";
-import { getApiClient } from "../../util/getClient";
-import { ResponseError } from "../../../sdk-client";
+import { client } from "../../../sdk-client";
+import { AxiosError } from "axios";
 
 export const buildDeleteCommand: CommandModule<
 	{},
@@ -23,21 +23,47 @@ export const buildDeleteCommand: CommandModule<
 		token: { type: "string", demandOption: true, hidden: true },
 	},
 	handler: async (args) => {
-		const client = getApiClient(args.token);
 		try {
-			await client.deleteBuild({
-				appId: args.appId,
-				buildId: args.buildId,
-			});
-			console.log("Build deleted");
-		} catch (e) {
-			if (e instanceof ResponseError) {
-				ERROR_MESSAGES.RESPONSE_ERROR(
-					e.response.status.toString(),
-					e.response.statusText
-				);
+			const response = await client.builds.delete(
+				{
+					auth0: `Bearer ${args.token}`,
+				},
+				args.appId,
+				args.buildId
+			);
+
+			switch (response.statusCode) {
+				case 204:
+					console.log("Build deleted");
+					break;
+				case 404:
+					ERROR_MESSAGES.RESPONSE_ERROR(
+						response.statusCode.toString(),
+						response.deleteBuild404ApplicationJSONString
+					);
+					break;
+				case 422:
+					ERROR_MESSAGES.RESPONSE_ERROR(
+						response.statusCode.toString(),
+						response.deleteBuild422ApplicationJSONString
+					);
+					break;
+				case 500:
+					ERROR_MESSAGES.RESPONSE_ERROR(
+						response.statusCode.toString(),
+						response.deleteBuild500ApplicationJSONString
+					);
+					break;
+				default:
+					ERROR_MESSAGES.RESPONSE_ERROR(
+						response.statusCode.toString(),
+						response.rawResponse?.statusText
+					);
 			}
-			throw e;
+		} catch (e) {
+			if (e instanceof AxiosError) {
+				ERROR_MESSAGES.UNKNOWN_ERROR(e.message);
+			}
 		}
 	},
 };

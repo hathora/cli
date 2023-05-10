@@ -36,7 +36,7 @@ export const listDeploymentsCommand: CommandModule<
 	handler: async (args) => {
 		const client = getApiClient(args.token);
 		try {
-			let response = await client.getDeployments({
+			const response = await client.getDeployments({
 				appId: args.appId,
 			});
 			if (args.raw) {

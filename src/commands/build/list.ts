@@ -1,7 +1,7 @@
 import { CommandModule } from "yargs";
 import { ERROR_MESSAGES } from "../../util/errors";
-import { getApiClient } from "../../util/getClient";
-import { ResponseError } from "../../../sdk-client";
+import { client } from "../../../sdk-client";
+import { AxiosError } from "axios";
 
 export const listBuildsCommand: CommandModule<
 	{},
@@ -34,24 +34,38 @@ export const listBuildsCommand: CommandModule<
 		token: { type: "string", demandOption: true, hidden: true },
 	},
 	handler: async (args) => {
-		const client = getApiClient(args.token);
 		try {
-			let response = await client.getBuilds({
-				appId: args.appId,
-			});
-			if (args.raw) {
-				console.log(response);
-			} else {
-				console.table(response, args.fields.split(","));
+			const response = await client.apps.getBuilds(
+				{
+					auth0: `Bearer ${args.token}`,
+				},
+				args.appId
+			);
+
+			switch (response.statusCode) {
+				case 200:
+					if (args.raw) {
+						console.log(response.builds);
+					} else {
+						console.table(response.builds, args.fields.split(","));
+					}
+					break;
+				case 404:
+					ERROR_MESSAGES.RESPONSE_ERROR(
+						response.statusCode.toString(),
+						response.getBuilds404ApplicationJSONString
+					);
+					break;
+				default:
+					ERROR_MESSAGES.RESPONSE_ERROR(
+						response.statusCode.toString(),
+						response.rawResponse?.statusText
+					);
 			}
 		} catch (e) {
-			if (e instanceof ResponseError) {
-				ERROR_MESSAGES.RESPONSE_ERROR(
-					e.response.status.toString(),
-					e.response.statusText
-				);
+			if (e instanceof AxiosError) {
+				ERROR_MESSAGES.UNKNOWN_ERROR(e.message);
 			}
-			throw e;
 		}
 	},
 };

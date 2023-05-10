@@ -66,7 +66,7 @@ export const logAllCommand: CommandModule<
 				| typeof client.getLogsForProcessRaw =
 				client.getLogsForAppRaw.bind(client);
 
-			let request: any = {
+			const request: any = {
 				appId: args.appId,
 				follow: args.follow,
 				timestamps: args.timestamps,
@@ -80,9 +80,9 @@ export const logAllCommand: CommandModule<
 				fn = client.getLogsForDeploymentRaw.bind(client);
 				request.deploymentId = args.deploymentId;
 			}
-			let respone = await fn(request);
+			const respone = await fn(request);
 
-			let body = respone.raw.body!;
+			const body = respone.raw.body!;
 			body["pipe"](process.stdout);
 		} catch (e) {
 			if (e instanceof ResponseError) {

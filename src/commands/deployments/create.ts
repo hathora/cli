@@ -1,15 +1,19 @@
 import { CommandModule } from "yargs";
 import { ERROR_MESSAGES } from "../../util/errors";
-import { getApiClient } from "../../util/getClient";
-import { ResponseError } from "../../../sdk-client";
+import { client } from "../../../sdk-client";
+import {
+	PlanNameEnum,
+	TransportTypeEnum,
+} from "@speakeasy-sdks/hc-sdk/dist/sdk/models/shared";
+import { AxiosError } from "axios";
 
 export const createDeploymentCommand: CommandModule<
 	{},
 	{
 		appId: string;
 		roomsPerProcess: number;
-		planName: "tiny" | "small" | "medium" | "large";
-		transportType: "tcp" | "udp" | "tls";
+		planName: PlanNameEnum;
+		transportType: TransportTypeEnum;
 		containerPort: number;
 		buildId: number;
 		env: string;
@@ -60,28 +64,54 @@ export const createDeploymentCommand: CommandModule<
 		token: { type: "string", demandOption: true, hidden: true },
 	},
 	handler: async (args) => {
-		const client = getApiClient(args.token);
 		try {
-			const deployment = await client.createDeployment({
-				appId: args.appId,
-				buildId: args.buildId,
-				deploymentConfig: {
+			const response = await client.deployment.create(
+				{
+					auth0: `Bearer ${args.token}`,
+				},
+				{
 					roomsPerProcess: args.roomsPerProcess,
 					planName: args.planName,
 					transportType: args.transportType,
 					containerPort: args.containerPort,
 					env: JSON.parse(args.env),
 				},
-			});
-			console.log(deployment);
-		} catch (e) {
-			if (e instanceof ResponseError) {
-				ERROR_MESSAGES.RESPONSE_ERROR(
-					e.response.status.toString(),
-					e.response.statusText
-				);
+				args.appId,
+				args.buildId
+			);
+
+			switch (response.statusCode) {
+				case 201:
+					console.log(response.deployment);
+					break;
+				case 400:
+					ERROR_MESSAGES.RESPONSE_ERROR(
+						response.statusCode.toString(),
+						response.createDeployment400ApplicationJSONString
+					);
+					break;
+				case 404:
+					ERROR_MESSAGES.RESPONSE_ERROR(
+						response.statusCode.toString(),
+						response.createDeployment404ApplicationJSONString
+					);
+					break;
+				case 500:
+					ERROR_MESSAGES.RESPONSE_ERROR(
+						response.statusCode.toString(),
+						response.createDeployment500ApplicationJSONString
+					);
+					break;
+				default:
+					ERROR_MESSAGES.RESPONSE_ERROR(
+						response.statusCode.toString(),
+						response.rawResponse?.statusText
+					);
 			}
-			throw e;
+		} catch (e) {
+			if (e instanceof AxiosError) {
+				ERROR_MESSAGES.UNKNOWN_ERROR(e.message);
+			}
 		}
 	},
 };
