@@ -1,7 +1,7 @@
 import { CommandModule } from "yargs";
 import { ERROR_MESSAGES } from "../../util/errors";
-import { getApiClient } from "../../util/getClient";
-import { ResponseError } from "../../../sdk-client";
+import { client } from "../../../sdk-client";
+import { AxiosError } from "axios";
 
 export const roomConnectionInfoCommand: CommandModule<
 	{},
@@ -23,21 +23,44 @@ export const roomConnectionInfoCommand: CommandModule<
 		token: { type: "string", demandOption: true, hidden: true },
 	},
 	handler: async (args) => {
-		const client = getApiClient(args.token);
 		try {
-			const connectionInfo = await client.getConnectionInfo({
-				appId: args.appId,
-				roomId: args.roomId,
-			});
-			console.log(connectionInfo);
-		} catch (e) {
-			if (e instanceof ResponseError) {
-				ERROR_MESSAGES.RESPONSE_ERROR(
-					e.response.status.toString(),
-					e.response.statusText
-				);
+			const response = await client.rooms.getConnectionInfo(
+				args.appId,
+				args.roomId
+			);
+
+			switch (response.statusCode) {
+				case 200:
+					console.log(response.connectionInfo);
+					break;
+				case 400:
+					ERROR_MESSAGES.RESPONSE_ERROR(
+						response.statusCode.toString(),
+						response.getConnectionInfo400ApplicationJSONString
+					);
+					break;
+				case 404:
+					ERROR_MESSAGES.RESPONSE_ERROR(
+						response.statusCode.toString(),
+						response.getConnectionInfo404ApplicationJSONString
+					);
+					break;
+				case 500:
+					ERROR_MESSAGES.RESPONSE_ERROR(
+						response.statusCode.toString(),
+						response.getConnectionInfo500ApplicationJSONString
+					);
+					break;
+				default:
+					ERROR_MESSAGES.RESPONSE_ERROR(
+						response.statusCode.toString(),
+						response.rawResponse?.statusText
+					);
 			}
-			throw e;
+		} catch (e) {
+			if (e instanceof AxiosError) {
+				ERROR_MESSAGES.UNKNOWN_ERROR(e.message);
+			}
 		}
 	},
 };

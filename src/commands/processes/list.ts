@@ -1,15 +1,20 @@
 import { CommandModule } from "yargs";
 import { ERROR_MESSAGES } from "../../util/errors";
-import { getApiClient } from "../../util/getClient";
-import { Region, ResponseError } from "../../../sdk-client";
+import { client } from "../../../sdk-client";
+import { RegionEnum } from "@speakeasy-sdks/hc-sdk/dist/sdk/models/shared";
+import {
+	GetRunningProcessesResponse,
+	GetStoppedProcessesResponse,
+} from "@speakeasy-sdks/hc-sdk/dist/sdk/models/operations";
+import { AxiosError } from "axios";
 
 export const listProcessesCommand: CommandModule<
 	{},
 	{
 		appId: string;
-		region: Region | undefined;
+		region?: RegionEnum;
 		target: "running" | "stopped";
-		raw: boolean | undefined;
+		raw?: boolean;
 		fields: string;
 		token: string;
 	}
@@ -25,7 +30,7 @@ export const listProcessesCommand: CommandModule<
 		region: {
 			type: "string",
 			demandOption: false,
-			choices: Object.values(Region),
+			choices: Object.values(RegionEnum),
 			describe: "process region",
 		},
 		target: {
@@ -49,29 +54,57 @@ export const listProcessesCommand: CommandModule<
 		token: { type: "string", demandOption: true, hidden: true },
 	},
 	handler: async (args) => {
-		const client = getApiClient(args.token);
 		try {
-			const method =
+			const response =
 				args.target === "running"
-					? "getRunningProcesses"
-					: "getStoppedProcesses";
-			const response = await client[method]({
-				appId: args.appId,
-				region: args.region,
-			});
-			if (args.raw) {
-				console.log(response);
-			} else {
-				console.table(response, args.fields.split(","));
+					? await client.processes.getRunning(
+							{
+								auth0: `Bearer ${args.token}`,
+							},
+							args.appId,
+							args.region
+					  )
+					: await client.processes.getStopped(
+							{
+								auth0: `Bearer ${args.token}`,
+							},
+							args.appId,
+							args.region
+					  );
+			switch (response.statusCode) {
+				case 200:
+					const processes =
+						args.target === "running"
+							? (response as GetRunningProcessesResponse).processWithRooms
+							: (response as GetStoppedProcessesResponse).processes;
+					if (args.raw) {
+						console.log(processes);
+					} else {
+						console.table(processes, args.fields.split(","));
+					}
+					break;
+				case 404:
+					const errResponse =
+						args.target === "running"
+							? (response as GetRunningProcessesResponse)
+									.getRunningProcesses404ApplicationJSONString
+							: (response as GetStoppedProcessesResponse)
+									.getStoppedProcesses404ApplicationJSONString;
+					ERROR_MESSAGES.RESPONSE_ERROR(
+						response.statusCode.toString(),
+						errResponse
+					);
+					break;
+				default:
+					ERROR_MESSAGES.RESPONSE_ERROR(
+						response.statusCode.toString(),
+						response.rawResponse?.statusText
+					);
 			}
 		} catch (e) {
-			if (e instanceof ResponseError) {
-				ERROR_MESSAGES.RESPONSE_ERROR(
-					e.response.status.toString(),
-					e.response.statusText
-				);
+			if (e instanceof AxiosError) {
+				ERROR_MESSAGES.UNKNOWN_ERROR(e.message);
 			}
-			throw e;
 		}
 	},
 };

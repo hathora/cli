@@ -1,7 +1,6 @@
 import yargs, { MiddlewareFunction } from "yargs";
 import { hideBin } from "yargs/helpers";
 import { loginCommand } from "./commands/login";
-import { deployCommand } from "./commands/deploy";
 import { roomCommand } from "./commands/room";
 import { logAllCommand } from "./commands/log";
 import { processesCommand } from "./commands/processes";
@@ -44,11 +43,10 @@ yargs(hideBin(process.argv))
 	.usage("Usage: $0 <command> [options]")
 	.command(loginCommand)
 	.command(appsCommand)
-	// .command(deployCommand)
-	// .command(logAllCommand)
-	// .command(processesCommand)
-	// .command(deploymentsCommand)
+	.command(logAllCommand)
+	.command(processesCommand)
+	.command(deploymentsCommand)
 	.command(buildCommand)
-	// .command(roomCommand)
+	.command(roomCommand)
 	.help()
 	.parse();

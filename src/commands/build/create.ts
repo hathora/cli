@@ -44,7 +44,7 @@ export const createBuildCommand: CommandModule<
 
 			switch (createResponse.statusCode) {
 				case 201:
-					console.log(`Build created with id ${createResponse.build?.buildId}`);
+					console.log(createResponse.build);
 					break;
 				case 404:
 					ERROR_MESSAGES.RESPONSE_ERROR(
@@ -94,9 +94,7 @@ export const createBuildCommand: CommandModule<
 
 			switch (buildResponse.statusCode) {
 				case 200:
-					console.log(
-						`File ${file} uploaded for build ${createResponse.build?.buildId}`
-					);
+					console.log(buildResponse.runBuild200TextPlainByteString);
 					break;
 				case 404:
 					ERROR_MESSAGES.RESPONSE_ERROR(

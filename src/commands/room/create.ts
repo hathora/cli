@@ -1,11 +1,12 @@
 import { CommandModule } from "yargs";
 import { ERROR_MESSAGES } from "../../util/errors";
-import { getApiClient } from "../../util/getClient";
-import { Region, ResponseError } from "../../../sdk-client";
+import { client } from "../../../sdk-client";
+import { RegionEnum } from "@speakeasy-sdks/hc-sdk/dist/sdk/models/shared";
+import { AxiosError } from "axios";
 
 export const roomCreateCommand: CommandModule<
 	{},
-	{ appId: string; region: Region; token: string }
+	{ appId: string; region: RegionEnum; token: string }
 > = {
 	command: "create",
 	describe: "Create a new room",
@@ -19,26 +20,51 @@ export const roomCreateCommand: CommandModule<
 			type: "string",
 			demandOption: true,
 			describe: "Region to create the room in",
-			choices: Object.values(Region),
+			choices: Object.values(RegionEnum),
 		},
 		token: { type: "string", demandOption: true, hidden: true },
 	},
 	handler: async (args) => {
-		const client = getApiClient(args.token);
 		try {
-			const room = await client.createRoom({
-				appId: args.appId,
-				createRoomRequest: { region: args.region },
-			});
-			console.log(room);
-		} catch (e) {
-			if (e instanceof ResponseError) {
-				ERROR_MESSAGES.RESPONSE_ERROR(
-					e.response.status.toString(),
-					e.response.statusText
-				);
+			const response = await client.rooms.create(
+				{
+					auth0: `Bearer ${args.token}`,
+				},
+				{ region: args.region },
+				args.appId
+			);
+			switch (response.statusCode) {
+				case 201:
+					console.log(`Room created with id ${response.roomId}`);
+					break;
+				case 400:
+					ERROR_MESSAGES.RESPONSE_ERROR(
+						response.statusCode.toString(),
+						response.createRoom400ApplicationJSONString
+					);
+					break;
+				case 404:
+					ERROR_MESSAGES.RESPONSE_ERROR(
+						response.statusCode.toString(),
+						response.createRoom404ApplicationJSONString
+					);
+					break;
+				case 500:
+					ERROR_MESSAGES.RESPONSE_ERROR(
+						response.statusCode.toString(),
+						response.createRoom500ApplicationJSONString
+					);
+					break;
+				default:
+					ERROR_MESSAGES.RESPONSE_ERROR(
+						response.statusCode.toString(),
+						response.rawResponse?.statusText
+					);
 			}
-			throw e;
+		} catch (e) {
+			if (e instanceof AxiosError) {
+				ERROR_MESSAGES.UNKNOWN_ERROR(e.message);
+			}
 		}
 	},
 };
