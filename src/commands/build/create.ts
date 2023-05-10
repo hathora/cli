@@ -44,6 +44,7 @@ export const createBuildCommand: CommandModule<
 
 			switch (createResponse.statusCode) {
 				case 201:
+					console.log(`Build created with id ${createResponse.build?.buildId}`);
 					break;
 				case 404:
 					ERROR_MESSAGES.RESPONSE_ERROR(
@@ -75,13 +76,15 @@ export const createBuildCommand: CommandModule<
 					? await createTar()
 					: createReadStream(args.file);
 
+			const file = args.file ?? ((fileContents as ReadStream).path as string);
+
 			const buildResponse = await client.builds.run(
 				{
 					auth0: `Bearer ${args.token}`,
 				},
 				{
 					file: {
-						file: args.file ?? ((fileContents as ReadStream).path as string),
+						file: file,
 						content: await readStreamToBytes(fileContents as ReadStream),
 					},
 				},
@@ -91,7 +94,9 @@ export const createBuildCommand: CommandModule<
 
 			switch (buildResponse.statusCode) {
 				case 200:
-					console.log(buildResponse.runBuild200TextPlainByteString);
+					console.log(
+						`File ${file} uploaded for build ${createResponse.build?.buildId}`
+					);
 					break;
 				case 404:
 					ERROR_MESSAGES.RESPONSE_ERROR(

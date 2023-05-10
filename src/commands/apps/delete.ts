@@ -25,7 +25,6 @@ export const appDeleteCommand: CommandModule<
 				},
 				args.appId
 			);
-			console.log("response is: ", response);
 			switch (response.statusCode) {
 				case 204:
 					console.log("App deleted");
