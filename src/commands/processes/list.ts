@@ -1,6 +1,8 @@
+/* Copyright 2023 Hathora, Inc. */
 import { CommandModule } from "yargs";
-import { ERROR_MESSAGES } from "../../util/errors";
+
 import { getApiClient } from "../../util/getClient";
+import { ERROR_MESSAGES } from "../../util/errors";
 import { Region, ResponseError } from "../../../sdk-client";
 
 export const listProcessesCommand: CommandModule<
@@ -51,11 +53,8 @@ export const listProcessesCommand: CommandModule<
 	handler: async (args) => {
 		const client = getApiClient(args.token);
 		try {
-			const method =
-				args.target === "running"
-					? "getRunningProcesses"
-					: "getStoppedProcesses";
-			let response = await client[method]({
+			const method = args.target === "running" ? "getRunningProcesses" : "getStoppedProcesses";
+			const response = await client[method]({
 				appId: args.appId,
 				region: args.region,
 			});
@@ -66,10 +65,7 @@ export const listProcessesCommand: CommandModule<
 			}
 		} catch (e) {
 			if (e instanceof ResponseError) {
-				ERROR_MESSAGES.RESPONSE_ERROR(
-					e.response.status.toString(),
-					e.response.statusText
-				);
+				ERROR_MESSAGES.RESPONSE_ERROR(e.response.status.toString(), e.response.statusText);
 			}
 			throw e;
 		}

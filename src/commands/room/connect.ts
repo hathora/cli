@@ -1,12 +1,11 @@
+/* Copyright 2023 Hathora, Inc. */
 import { CommandModule } from "yargs";
-import { ERROR_MESSAGES } from "../../util/errors";
+
 import { getApiClient } from "../../util/getClient";
+import { ERROR_MESSAGES } from "../../util/errors";
 import { ResponseError } from "../../../sdk-client";
 
-export const roomConnectionInfoCommand: CommandModule<
-	{},
-	{ appId: string; roomId: string; token: string }
-> = {
+export const roomConnectionInfoCommand: CommandModule<{}, { appId: string; roomId: string; token: string }> = {
 	command: "connection-info",
 	describe: "get connection info for a room",
 	builder: {
@@ -32,10 +31,7 @@ export const roomConnectionInfoCommand: CommandModule<
 			console.log(connectionInfo);
 		} catch (e) {
 			if (e instanceof ResponseError) {
-				ERROR_MESSAGES.RESPONSE_ERROR(
-					e.response.status.toString(),
-					e.response.statusText
-				);
+				ERROR_MESSAGES.RESPONSE_ERROR(e.response.status.toString(), e.response.statusText);
 			}
 			throw e;
 		}

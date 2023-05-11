@@ -1,6 +1,8 @@
+/* Copyright 2023 Hathora, Inc. */
 import { CommandModule } from "yargs";
-import { ERROR_MESSAGES } from "../../util/errors";
+
 import { getApiClient } from "../../util/getClient";
+import { ERROR_MESSAGES } from "../../util/errors";
 import { ResponseError } from "../../../sdk-client";
 
 export const createDeploymentCommand: CommandModule<
@@ -54,8 +56,7 @@ export const createDeploymentCommand: CommandModule<
 		env: {
 			type: "string",
 			demandOption: true,
-			describe:
-				"JSON stringified version of env variables array (name and value)",
+			describe: "JSON stringified version of env variables array (name and value)",
 		},
 		token: { type: "string", demandOption: true, hidden: true },
 	},
@@ -76,10 +77,7 @@ export const createDeploymentCommand: CommandModule<
 			console.log(deployment);
 		} catch (e) {
 			if (e instanceof ResponseError) {
-				ERROR_MESSAGES.RESPONSE_ERROR(
-					e.response.status.toString(),
-					e.response.statusText
-				);
+				ERROR_MESSAGES.RESPONSE_ERROR(e.response.status.toString(), e.response.statusText);
 			}
 			throw e;
 		}

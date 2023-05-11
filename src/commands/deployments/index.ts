@@ -1,6 +1,8 @@
+/* Copyright 2023 Hathora, Inc. */
 import { CommandModule } from "yargs";
-import { createDeploymentCommand } from "./create";
+
 import { listDeploymentsCommand } from "./list";
+import { createDeploymentCommand } from "./create";
 
 export const deploymentsCommand: CommandModule<{}, any> = {
 	command: "deployments [subcommand]",

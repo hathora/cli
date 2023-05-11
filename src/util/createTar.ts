@@ -1,9 +1,13 @@
-import { findUp } from "./findUp";
-import tar from "tar";
-import { createReadStream, createWriteStream } from "fs";
-import { mkdtemp, unlink } from "fs/promises";
+/* Copyright 2023 Hathora, Inc. */
+
 import { join, sep } from "path";
 import { tmpdir } from "os";
+import { mkdtemp, unlink } from "fs/promises";
+import { createReadStream, createWriteStream } from "fs";
+
+import tar from "tar";
+
+import { findUp } from "./findUp";
 
 export async function createTar() {
 	const rootDir = findUp("Dockerfile");
@@ -19,8 +23,7 @@ export async function createTar() {
 			{
 				cwd: rootDir,
 				gzip: true,
-				filter: (path) =>
-					!path.includes("node_modules") && !path.includes(".git"),
+				filter: (path) => !path.includes("node_modules") && !path.includes(".git"),
 			},
 			["."]
 		)

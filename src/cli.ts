@@ -1,18 +1,22 @@
-import yargs, { MiddlewareFunction } from "yargs";
+/* Copyright 2023 Hathora, Inc. */
+import { join } from "path";
+import { homedir } from "os";
+import { existsSync, readFileSync } from "fs";
+
 import { hideBin } from "yargs/helpers";
-import { loginCommand } from "./commands/login";
-import { deployCommand } from "./commands/deploy";
+import yargs, { MiddlewareFunction } from "yargs";
+import chalk from "chalk";
+
+import { version } from "../package.json";
+
 import { roomCommand } from "./commands/room";
-import { logAllCommand } from "./commands/log";
 import { processesCommand } from "./commands/processes";
+import { loginCommand } from "./commands/login";
+import { logAllCommand } from "./commands/log";
 import { deploymentsCommand } from "./commands/deployments";
+import { deployCommand } from "./commands/deploy";
 import { buildCommand } from "./commands/build";
 import { appsCommand } from "./commands/apps";
-import { version } from "../package.json";
-import chalk from "chalk";
-import { join } from "path";
-import { existsSync, readFileSync } from "fs";
-import { homedir } from "os";
 
 const tokenMiddleware: MiddlewareFunction = (argv) => {
 	if (argv._[0] === "login" || "token" in argv) {
@@ -21,13 +25,7 @@ const tokenMiddleware: MiddlewareFunction = (argv) => {
 
 	const tokenFile = join(homedir(), ".config", "hathora", "token");
 	if (!existsSync(tokenFile)) {
-		console.log(
-			chalk.redBright(
-				`Missing token file, run ${chalk.underline(
-					"hathora-cloud login"
-				)} first`
-			)
-		);
+		console.log(chalk.redBright(`Missing token file, run ${chalk.underline("hathora-cloud login")} first`));
 		return;
 	}
 

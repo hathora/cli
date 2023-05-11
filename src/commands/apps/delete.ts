@@ -1,12 +1,11 @@
+/* Copyright 2023 Hathora, Inc. */
 import { CommandModule } from "yargs";
+
+import { getAppApiClient } from "../../util/getClient";
 import { ERROR_MESSAGES } from "../../util/errors";
 import { ResponseError } from "../../../sdk-client";
-import { getAppApiClient } from "../../util/getClient";
 
-export const appDeleteCommand: CommandModule<
-	{},
-	{ appId: string; token: string }
-> = {
+export const appDeleteCommand: CommandModule<{}, { appId: string; token: string }> = {
 	command: "delete",
 	describe: "Delete an app",
 	builder: {
@@ -26,10 +25,7 @@ export const appDeleteCommand: CommandModule<
 			console.log("App deleted");
 		} catch (e) {
 			if (e instanceof ResponseError) {
-				ERROR_MESSAGES.RESPONSE_ERROR(
-					e.response.status.toString(),
-					e.response.statusText
-				);
+				ERROR_MESSAGES.RESPONSE_ERROR(e.response.status.toString(), e.response.statusText);
 			}
 			throw e;
 		}

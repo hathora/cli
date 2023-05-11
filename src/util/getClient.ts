@@ -1,3 +1,4 @@
+/* Copyright 2023 Hathora, Inc. */
 import fetch, { Headers, Request, Response } from "node-fetch";
 import FormData from "form-data";
 // @ts-expect-error
@@ -11,7 +12,9 @@ globalThis.Response = Response as any;
 SuppressWarnings([(warning) => warning.toString().includes("form-data")]);
 
 import { API_BASE } from "../config/api";
+
 import SuppressWarnings from "suppress-warnings";
+
 import {
 	AppV1Api,
 	BuildV1Api,

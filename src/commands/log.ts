@@ -1,6 +1,8 @@
+/* Copyright 2023 Hathora, Inc. */
 import { CommandModule } from "yargs";
-import { ERROR_MESSAGES } from "../util/errors";
+
 import { getApiClient } from "../util/getClient";
+import { ERROR_MESSAGES } from "../util/errors";
 import { Region, ResponseError } from "../../sdk-client";
 
 export const logAllCommand: CommandModule<
@@ -63,10 +65,9 @@ export const logAllCommand: CommandModule<
 			let fn:
 				| typeof client.getLogsForAppRaw
 				| typeof client.getLogsForDeploymentRaw
-				| typeof client.getLogsForProcessRaw =
-				client.getLogsForAppRaw.bind(client);
+				| typeof client.getLogsForProcessRaw = client.getLogsForAppRaw.bind(client);
 
-			let request: any = {
+			const request: any = {
 				appId: args.appId,
 				follow: args.follow,
 				timestamps: args.timestamps,
@@ -80,16 +81,13 @@ export const logAllCommand: CommandModule<
 				fn = client.getLogsForDeploymentRaw.bind(client);
 				request.deploymentId = args.deploymentId;
 			}
-			let respone = await fn(request);
+			const respone = await fn(request);
 
-			let body = respone.raw.body!;
+			const body = respone.raw.body!;
 			body["pipe"](process.stdout);
 		} catch (e) {
 			if (e instanceof ResponseError) {
-				ERROR_MESSAGES.RESPONSE_ERROR(
-					e.response.status.toString(),
-					e.response.statusText
-				);
+				ERROR_MESSAGES.RESPONSE_ERROR(e.response.status.toString(), e.response.statusText);
 			}
 			throw e;
 		}

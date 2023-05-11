@@ -1,12 +1,11 @@
+/* Copyright 2023 Hathora, Inc. */
 import { CommandModule } from "yargs";
-import { ERROR_MESSAGES } from "../../util/errors";
+
 import { getApiClient } from "../../util/getClient";
+import { ERROR_MESSAGES } from "../../util/errors";
 import { Region, ResponseError } from "../../../sdk-client";
 
-export const roomCreateCommand: CommandModule<
-	{},
-	{ appId: string; region: Region; token: string }
-> = {
+export const roomCreateCommand: CommandModule<{}, { appId: string; region: Region; token: string }> = {
 	command: "create",
 	describe: "Create a new room",
 	builder: {
@@ -33,10 +32,7 @@ export const roomCreateCommand: CommandModule<
 			console.log(room);
 		} catch (e) {
 			if (e instanceof ResponseError) {
-				ERROR_MESSAGES.RESPONSE_ERROR(
-					e.response.status.toString(),
-					e.response.statusText
-				);
+				ERROR_MESSAGES.RESPONSE_ERROR(e.response.status.toString(), e.response.statusText);
 			}
 			throw e;
 		}

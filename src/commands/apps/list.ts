@@ -1,7 +1,9 @@
+/* Copyright 2023 Hathora, Inc. */
 import { CommandModule } from "yargs";
+
+import { getAppApiClient } from "../../util/getClient";
 import { ERROR_MESSAGES } from "../../util/errors";
 import { ResponseError } from "../../../sdk-client";
-import { getAppApiClient } from "../../util/getClient";
 
 export const listAppsCommand: CommandModule<
 	{},
@@ -30,7 +32,7 @@ export const listAppsCommand: CommandModule<
 	handler: async (args) => {
 		const client = getAppApiClient(args.token);
 		try {
-			let response = await client.getApps();
+			const response = await client.getApps();
 			if (args.raw) {
 				console.log(response);
 			} else {
@@ -38,10 +40,7 @@ export const listAppsCommand: CommandModule<
 			}
 		} catch (e) {
 			if (e instanceof ResponseError) {
-				ERROR_MESSAGES.RESPONSE_ERROR(
-					e.response.status.toString(),
-					e.response.statusText
-				);
+				ERROR_MESSAGES.RESPONSE_ERROR(e.response.status.toString(), e.response.statusText);
 			}
 			throw e;
 		}

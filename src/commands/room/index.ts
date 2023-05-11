@@ -1,4 +1,6 @@
+/* Copyright 2023 Hathora, Inc. */
 import { CommandModule } from "yargs";
+
 import { roomCreateCommand } from "./create";
 import { roomConnectionInfoCommand } from "./connect";
 

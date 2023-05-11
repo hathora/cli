@@ -1,7 +1,9 @@
+/* Copyright 2023 Hathora, Inc. */
 import { CommandModule } from "yargs";
-import { appCreateCommand } from "./create";
-import { appDeleteCommand } from "./delete";
+
 import { listAppsCommand } from "./list";
+import { appDeleteCommand } from "./delete";
+import { appCreateCommand } from "./create";
 
 export const appsCommand: CommandModule<{}, any> = {
 	command: "apps [subcommand]",

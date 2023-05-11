@@ -1,13 +1,14 @@
+/* Copyright 2023 Hathora, Inc. */
 import { join } from "path";
 import os from "os";
 import { existsSync } from "fs";
 
+import { CommandModule } from "yargs";
 import prompts from "prompts";
 import { Issuer } from "openid-client";
 import open from "open";
 import { outputFileSync } from "fs-extra";
 import chalk from "chalk";
-import { CommandModule } from "yargs";
 
 export const loginCommand: CommandModule = {
 	command: "login",
@@ -51,15 +52,9 @@ export const loginCommand: CommandModule = {
 		const tokens = await handle.poll();
 		if (tokens.refresh_token) {
 			outputFileSync(tokenPath, tokens.refresh_token);
-			console.log(
-				chalk.green(`Successfully logged in! Saved credentials to ${tokenPath}`)
-			);
+			console.log(chalk.green(`Successfully logged in! Saved credentials to ${tokenPath}`));
 		} else {
-			console.log(
-				chalk.red(
-					`Something went wrong. Please try again. If the problem persists, please let us know.`
-				)
-			);
+			console.log(chalk.red(`Something went wrong. Please try again. If the problem persists, please let us know.`));
 		}
 	},
 };

@@ -1,6 +1,8 @@
+/* Copyright 2023 Hathora, Inc. */
 import { CommandModule } from "yargs";
-import { ERROR_MESSAGES } from "../../util/errors";
+
 import { getApiClient } from "../../util/getClient";
+import { ERROR_MESSAGES } from "../../util/errors";
 import { ResponseError } from "../../../sdk-client";
 
 export const listBuildsCommand: CommandModule<
@@ -36,7 +38,7 @@ export const listBuildsCommand: CommandModule<
 	handler: async (args) => {
 		const client = getApiClient(args.token);
 		try {
-			let response = await client.getBuilds({
+			const response = await client.getBuilds({
 				appId: args.appId,
 			});
 			if (args.raw) {
@@ -46,10 +48,7 @@ export const listBuildsCommand: CommandModule<
 			}
 		} catch (e) {
 			if (e instanceof ResponseError) {
-				ERROR_MESSAGES.RESPONSE_ERROR(
-					e.response.status.toString(),
-					e.response.statusText
-				);
+				ERROR_MESSAGES.RESPONSE_ERROR(e.response.status.toString(), e.response.statusText);
 			}
 			throw e;
 		}

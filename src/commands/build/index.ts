@@ -1,7 +1,9 @@
+/* Copyright 2023 Hathora, Inc. */
 import { CommandModule } from "yargs";
-import { createBuildCommand } from "./create";
-import { buildDeleteCommand } from "./delete";
+
 import { listBuildsCommand } from "./list";
+import { buildDeleteCommand } from "./delete";
+import { createBuildCommand } from "./create";
 
 export const buildCommand: CommandModule<{}, any> = {
 	command: "builds [subcommand]",

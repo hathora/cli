@@ -1,10 +1,13 @@
-import { CommandModule } from "yargs";
-import { ERROR_MESSAGES } from "../../util/errors";
-import { ResponseError } from "../../../sdk-client";
+/* Copyright 2023 Hathora, Inc. */
 import { stat } from "fs/promises";
 import { createReadStream } from "fs";
-import { createTar } from "../../util/createTar";
+
+import { CommandModule } from "yargs";
+
 import { getBuildApiClient } from "../../util/getClient";
+import { ERROR_MESSAGES } from "../../util/errors";
+import { createTar } from "../../util/createTar";
+import { ResponseError } from "../../../sdk-client";
 
 export const createBuildCommand: CommandModule<
 	{},
@@ -35,10 +38,7 @@ export const createBuildCommand: CommandModule<
 				return ERROR_MESSAGES.FILE_NOT_FOUND(args.file);
 			}
 
-			const fileContents =
-				args.file === undefined
-					? await createTar()
-					: createReadStream(args.file);
+			const fileContents = args.file === undefined ? await createTar() : createReadStream(args.file);
 
 			const createResponse = await client.createBuild({
 				appId: args.appId,
@@ -48,15 +48,12 @@ export const createBuildCommand: CommandModule<
 				buildId: createResponse.buildId,
 				file: fileContents, // readable stream works with the form-data package but the generated sdk wants a blob.
 			});
-			let body = buildResponse.raw.body!;
+			const body = buildResponse.raw.body!;
 			body.pipeThrough(process.stdout);
 			await buildResponse.value();
 		} catch (e) {
 			if (e instanceof ResponseError) {
-				ERROR_MESSAGES.RESPONSE_ERROR(
-					e.response.status.toString(),
-					e.response.statusText
-				);
+				ERROR_MESSAGES.RESPONSE_ERROR(e.response.status.toString(), e.response.statusText);
 			}
 			throw e;
 		}
