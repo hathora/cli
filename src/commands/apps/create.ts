@@ -1,7 +1,7 @@
 import { CommandModule } from "yargs";
 import { ERROR_MESSAGES } from "../../util/errors";
-import { getApiClient } from "../../util/getClient";
 import { ResponseError } from "../../../sdk-client";
+import { getAppApiClient } from "../../util/getClient";
 
 export const appCreateCommand: CommandModule<
 	{},
@@ -18,10 +18,10 @@ export const appCreateCommand: CommandModule<
 		token: { type: "string", demandOption: true, hidden: true },
 	},
 	handler: async (args) => {
-		const client = getApiClient(args.token);
+		const client = getAppApiClient(args.token);
 		try {
 			const response = await client.createApp({
-				createAppRequest: {
+				appConfig: {
 					appName: args.appName,
 					authConfiguration: {
 						anonymous: {},

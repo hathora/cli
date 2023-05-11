@@ -1,10 +1,10 @@
 import { CommandModule } from "yargs";
 import { ERROR_MESSAGES } from "../../util/errors";
-import { getApiClient } from "../../util/getClient";
 import { ResponseError } from "../../../sdk-client";
 import { stat } from "fs/promises";
 import { createReadStream } from "fs";
 import { createTar } from "../../util/createTar";
+import { getBuildApiClient } from "../../util/getClient";
 
 export const createBuildCommand: CommandModule<
 	{},
@@ -29,7 +29,7 @@ export const createBuildCommand: CommandModule<
 		token: { type: "string", demandOption: true, hidden: true },
 	},
 	handler: async (args) => {
-		const client = getApiClient(args.token);
+		const client = getBuildApiClient(args.token);
 		try {
 			if (args.file && !(await stat(args.file)).isFile()) {
 				return ERROR_MESSAGES.FILE_NOT_FOUND(args.file);
@@ -46,11 +46,10 @@ export const createBuildCommand: CommandModule<
 			const buildResponse = await client.runBuildRaw({
 				appId: args.appId,
 				buildId: createResponse.buildId,
-				// @ts-expect-error
 				file: fileContents, // readable stream works with the form-data package but the generated sdk wants a blob.
 			});
 			let body = buildResponse.raw.body!;
-			body["pipe"](process.stdout);
+			body.pipeThrough(process.stdout);
 			await buildResponse.value();
 		} catch (e) {
 			if (e instanceof ResponseError) {

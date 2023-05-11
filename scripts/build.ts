@@ -20,7 +20,6 @@ import esbuild from "esbuild";
 
 	if (isDev) {
 		const context = await esbuild.context(config);
-
 		context.watch();
 	} else {
 		await esbuild.build(config).then(async (res) => {

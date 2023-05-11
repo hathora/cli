@@ -79,7 +79,6 @@ export const deployCommand: CommandModule<
 			const buildResponse = await client.runBuildRaw({
 				appId: args.appId,
 				buildId: response.buildId,
-				// @ts-expect-error
 				file: fileContents, // readable stream works with the form-data package but the generated sdk wants a blob.
 			});
 			let body = buildResponse.raw.body!;
