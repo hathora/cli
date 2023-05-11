@@ -12,6 +12,7 @@ import esbuild from "esbuild";
 		target: "node14",
 		plugins: [],
 		metafile: true,
+		logLevel: "info",
 		banner: {
 			js: "#!/usr/bin/env node",
 		},

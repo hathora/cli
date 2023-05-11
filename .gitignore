@@ -2,3 +2,4 @@ node_modules/
 dist/
 sdk-client/
 deploy.tgz
+.idea

@@ -16,11 +16,9 @@ export async function readStreamToBytes(
 				output.set(chunk, byteOffset);
 				byteOffset += chunk.length;
 			}
-			unlink(readStream.path as string);
 			resolve(output);
 		});
 		readStream.on("error", (err) => {
-			unlink(readStream.path as string);
 			reject(err);
 		});
 	});
