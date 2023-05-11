@@ -9,14 +9,14 @@ import chalk from "chalk";
 
 import { version } from "../package.json";
 
-import { roomCommand } from "./commands/room";
-import { processesCommand } from "./commands/processes";
-import { loginCommand } from "./commands/login";
-import { logAllCommand } from "./commands/log";
-import { deploymentsCommand } from "./commands/deployments";
-import { deployCommand } from "./commands/deploy";
-import { buildCommand } from "./commands/build";
-import { appsCommand } from "./commands/apps";
+import { roomCommand } from "./commands/room/index.js";
+import { processesCommand } from "./commands/processes/index.js";
+import { loginCommand } from "./commands/login.js";
+import { logAllCommand } from "./commands/log.js";
+import { deploymentsCommand } from "./commands/deployments/index.js";
+import { deployCommand } from "./commands/deploy.js";
+import { buildCommand } from "./commands/build/index.js";
+import { appsCommand } from "./commands/apps/index.js";
 
 const tokenMiddleware: MiddlewareFunction = (argv) => {
 	if (argv._[0] === "login" || "token" in argv) {

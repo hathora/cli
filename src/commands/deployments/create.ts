@@ -1,12 +1,12 @@
 /* Copyright 2023 Hathora, Inc. */
 import { CommandModule } from "yargs";
 
-import { getApiClient } from "../../util/getClient";
-import { ERROR_MESSAGES } from "../../util/errors";
-import { ResponseError } from "../../../sdk-client";
+import { getDeploymentApiClient } from "../../util/getClient.js";
+import { ERROR_MESSAGES } from "../../util/errors.js";
+import { ResponseError } from "../../../sdk-client/index.js";
 
 export const createDeploymentCommand: CommandModule<
-	{},
+	object,
 	{
 		appId: string;
 		roomsPerProcess: number;
@@ -61,7 +61,7 @@ export const createDeploymentCommand: CommandModule<
 		token: { type: "string", demandOption: true, hidden: true },
 	},
 	handler: async (args) => {
-		const client = getApiClient(args.token);
+		const client = getDeploymentApiClient(args.token);
 		try {
 			const deployment = await client.createDeployment({
 				appId: args.appId,

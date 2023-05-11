@@ -4,13 +4,13 @@ import { createReadStream } from "fs";
 
 import { CommandModule } from "yargs";
 
-import { getBuildApiClient } from "../../util/getClient";
-import { ERROR_MESSAGES } from "../../util/errors";
-import { createTar } from "../../util/createTar";
-import { ResponseError } from "../../../sdk-client";
+import { getBuildApiClient } from "../../util/getClient.js";
+import { ERROR_MESSAGES } from "../../util/errors.js";
+import { createTar } from "../../util/createTar.js";
+import { ResponseError } from "../../../sdk-client/index.js";
 
 export const createBuildCommand: CommandModule<
-	{},
+	object,
 	{
 		appId: string;
 		file: string;

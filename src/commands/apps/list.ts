@@ -1,12 +1,12 @@
 /* Copyright 2023 Hathora, Inc. */
 import { CommandModule } from "yargs";
 
-import { getAppApiClient } from "../../util/getClient";
-import { ERROR_MESSAGES } from "../../util/errors";
-import { ResponseError } from "../../../sdk-client";
+import { getAppApiClient } from "../../util/getClient.js";
+import { ERROR_MESSAGES } from "../../util/errors.js";
+import { ResponseError } from "../../../sdk-client/index.js";
 
 export const listAppsCommand: CommandModule<
-	{},
+	object,
 	{
 		raw: boolean | undefined;
 		fields: string;

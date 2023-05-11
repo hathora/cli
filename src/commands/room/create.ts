@@ -1,11 +1,11 @@
 /* Copyright 2023 Hathora, Inc. */
 import { CommandModule } from "yargs";
 
-import { getApiClient } from "../../util/getClient";
-import { ERROR_MESSAGES } from "../../util/errors";
-import { Region, ResponseError } from "../../../sdk-client";
+import { getRoomApiClient } from "../../util/getClient.js";
+import { ERROR_MESSAGES } from "../../util/errors.js";
+import { Region, ResponseError } from "../../../sdk-client/index.js";
 
-export const roomCreateCommand: CommandModule<{}, { appId: string; region: Region; token: string }> = {
+export const roomCreateCommand: CommandModule<object, { appId: string; region: Region; token: string }> = {
 	command: "create",
 	describe: "Create a new room",
 	builder: {
@@ -23,7 +23,7 @@ export const roomCreateCommand: CommandModule<{}, { appId: string; region: Regio
 		token: { type: "string", demandOption: true, hidden: true },
 	},
 	handler: async (args) => {
-		const client = getApiClient(args.token);
+		const client = getRoomApiClient(args.token);
 		try {
 			const room = await client.createRoom({
 				appId: args.appId,

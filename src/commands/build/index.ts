@@ -1,11 +1,11 @@
 /* Copyright 2023 Hathora, Inc. */
 import { CommandModule } from "yargs";
 
-import { listBuildsCommand } from "./list";
-import { buildDeleteCommand } from "./delete";
-import { createBuildCommand } from "./create";
+import { listBuildsCommand } from "./list.js";
+import { buildDeleteCommand } from "./delete.js";
+import { createBuildCommand } from "./create.js";
 
-export const buildCommand: CommandModule<{}, any> = {
+export const buildCommand: CommandModule<object, any> = {
 	command: "builds [subcommand]",
 	describe: "Manage or create builds",
 	builder(yargs) {
@@ -16,5 +16,7 @@ export const buildCommand: CommandModule<{}, any> = {
 			.demandCommand(1, "Please specify a subcommand")
 			.help();
 	},
-	handler: () => {},
+	handler: () => {
+		// do nothing
+	},
 };

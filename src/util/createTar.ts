@@ -7,7 +7,7 @@ import { createReadStream, createWriteStream } from "fs";
 
 import tar from "tar";
 
-import { findUp } from "./findUp";
+import { findUp } from "./findUp.js";
 
 export async function createTar() {
 	const rootDir = findUp("Dockerfile");

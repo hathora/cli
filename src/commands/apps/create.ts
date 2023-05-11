@@ -1,11 +1,11 @@
 /* Copyright 2023 Hathora, Inc. */
 import { CommandModule } from "yargs";
 
-import { getAppApiClient } from "../../util/getClient";
-import { ERROR_MESSAGES } from "../../util/errors";
-import { ResponseError } from "../../../sdk-client";
+import { getAppApiClient } from "../../util/getClient.js";
+import { ERROR_MESSAGES } from "../../util/errors.js";
+import { ResponseError } from "../../../sdk-client/index.js";
 
-export const appCreateCommand: CommandModule<{}, { appName: string; token: string }> = {
+export const appCreateCommand: CommandModule<object, { appName: string; token: string }> = {
 	command: "create",
 	describe: "Create a new app",
 	builder: {

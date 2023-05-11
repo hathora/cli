@@ -4,13 +4,13 @@ import { createReadStream } from "fs";
 
 import { CommandModule } from "yargs";
 
-import { getApiClient } from "../util/getClient";
-import { ERROR_MESSAGES } from "../util/errors";
-import { createTar } from "../util/createTar";
-import { ResponseError } from "../../sdk-client";
+import { getBuildApiClient, getDeploymentApiClient } from "../util/getClient.js";
+import { ERROR_MESSAGES } from "../util/errors.js";
+import { createTar } from "../util/createTar.js";
+import { ResponseError } from "../../sdk-client/index.js";
 
 export const deployCommand: CommandModule<
-	{},
+	object,
 	{
 		appId: string;
 		file: string;
@@ -64,9 +64,9 @@ export const deployCommand: CommandModule<
 		token: { type: "string", demandOption: true, hidden: true },
 	},
 	handler: async (args) => {
-		const client = getApiClient(args.token);
+		const buildClient = getBuildApiClient(args.token);
 		try {
-			const response = await client.createBuild({
+			const response = await buildClient.createBuild({
 				appId: args.appId,
 			});
 
@@ -75,7 +75,7 @@ export const deployCommand: CommandModule<
 			}
 
 			const fileContents = args.file === undefined ? await createTar() : createReadStream(args.file);
-			const buildResponse = await client.runBuildRaw({
+			const buildResponse = await buildClient.runBuildRaw({
 				appId: args.appId,
 				buildId: response.buildId,
 				file: fileContents, // readable stream works with the form-data package but the generated sdk wants a blob.
@@ -86,7 +86,8 @@ export const deployCommand: CommandModule<
 			await buildResponse.value();
 
 			console.log("Creating deployment...");
-			const deployment = await client.createDeployment({
+			const deploymentClient = getDeploymentApiClient(args.token);
+			const deployment = await deploymentClient.createDeployment({
 				appId: args.appId,
 				buildId: response.buildId,
 				deploymentConfig: {

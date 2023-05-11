@@ -1,11 +1,11 @@
 /* Copyright 2023 Hathora, Inc. */
 import { CommandModule } from "yargs";
 
-import { getApiClient } from "../../util/getClient";
-import { ERROR_MESSAGES } from "../../util/errors";
-import { ResponseError } from "../../../sdk-client";
+import { getRoomApiClient } from "../../util/getClient.js";
+import { ERROR_MESSAGES } from "../../util/errors.js";
+import { ResponseError } from "../../../sdk-client/index.js";
 
-export const roomConnectionInfoCommand: CommandModule<{}, { appId: string; roomId: string; token: string }> = {
+export const roomConnectionInfoCommand: CommandModule<object, { appId: string; roomId: string; token: string }> = {
 	command: "connection-info",
 	describe: "get connection info for a room",
 	builder: {
@@ -22,7 +22,7 @@ export const roomConnectionInfoCommand: CommandModule<{}, { appId: string; roomI
 		token: { type: "string", demandOption: true, hidden: true },
 	},
 	handler: async (args) => {
-		const client = getApiClient(args.token);
+		const client = getRoomApiClient(args.token);
 		try {
 			const connectionInfo = await client.getConnectionInfo({
 				appId: args.appId,

@@ -1,12 +1,12 @@
 /* Copyright 2023 Hathora, Inc. */
 import { CommandModule } from "yargs";
 
-import { getApiClient } from "../util/getClient";
-import { ERROR_MESSAGES } from "../util/errors";
-import { Region, ResponseError } from "../../sdk-client";
+import { getLogApiClient } from "../util/getClient.js";
+import { ERROR_MESSAGES } from "../util/errors.js";
+import { Region, ResponseError } from "../../sdk-client/index.js";
 
 export const logAllCommand: CommandModule<
-	{},
+	object,
 	{
 		appId: string;
 		follow: boolean | undefined;
@@ -60,7 +60,7 @@ export const logAllCommand: CommandModule<
 		token: { type: "string", demandOption: true, hidden: true },
 	},
 	handler: async (args) => {
-		const client = getApiClient(args.token);
+		const client = getLogApiClient(args.token);
 		try {
 			let fn:
 				| typeof client.getLogsForAppRaw

@@ -1,12 +1,12 @@
 /* Copyright 2023 Hathora, Inc. */
 import { CommandModule } from "yargs";
 
-import { getApiClient } from "../../util/getClient";
-import { ERROR_MESSAGES } from "../../util/errors";
-import { Region, ResponseError } from "../../../sdk-client";
+import { getProcessesApiClient } from "../../util/getClient.js";
+import { ERROR_MESSAGES } from "../../util/errors.js";
+import { Region, ResponseError } from "../../../sdk-client/index.js";
 
 export const listProcessesCommand: CommandModule<
-	{},
+	object,
 	{
 		appId: string;
 		region: Region | undefined;
@@ -51,7 +51,7 @@ export const listProcessesCommand: CommandModule<
 		token: { type: "string", demandOption: true, hidden: true },
 	},
 	handler: async (args) => {
-		const client = getApiClient(args.token);
+		const client = getProcessesApiClient(args.token);
 		try {
 			const method = args.target === "running" ? "getRunningProcesses" : "getStoppedProcesses";
 			const response = await client[method]({

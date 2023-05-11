@@ -1,8 +1,8 @@
+/* Copyright 2023 Hathora, Inc. */
 import esbuild from "esbuild";
 
 (async () => {
-	const isDev =
-		process.env.NODE_ENV === "development" || process.argv.includes("--dev");
+	const isDev = process.env.NODE_ENV === "development" || process.argv.includes("--dev");
 
 	const config: esbuild.BuildOptions = {
 		entryPoints: ["src/cli.ts"],

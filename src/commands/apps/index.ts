@@ -1,11 +1,11 @@
 /* Copyright 2023 Hathora, Inc. */
 import { CommandModule } from "yargs";
 
-import { listAppsCommand } from "./list";
-import { appDeleteCommand } from "./delete";
-import { appCreateCommand } from "./create";
+import { listAppsCommand } from "./list.js";
+import { appDeleteCommand } from "./delete.js";
+import { appCreateCommand } from "./create.js";
 
-export const appsCommand: CommandModule<{}, any> = {
+export const appsCommand: CommandModule<object, any> = {
 	command: "apps [subcommand]",
 	describe: "Manage or create apps",
 	builder(yargs) {
@@ -16,5 +16,7 @@ export const appsCommand: CommandModule<{}, any> = {
 			.demandCommand(1, "Please specify a subcommand")
 			.help();
 	},
-	handler: () => {},
+	handler: () => {
+		// do nothing
+	},
 };

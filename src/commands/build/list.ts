@@ -1,12 +1,12 @@
 /* Copyright 2023 Hathora, Inc. */
 import { CommandModule } from "yargs";
 
-import { getApiClient } from "../../util/getClient";
-import { ERROR_MESSAGES } from "../../util/errors";
-import { ResponseError } from "../../../sdk-client";
+import { getBuildApiClient } from "../../util/getClient.js";
+import { ERROR_MESSAGES } from "../../util/errors.js";
+import { ResponseError } from "../../../sdk-client/index.js";
 
 export const listBuildsCommand: CommandModule<
-	{},
+	object,
 	{
 		appId: string;
 		raw: boolean | undefined;
@@ -36,7 +36,7 @@ export const listBuildsCommand: CommandModule<
 		token: { type: "string", demandOption: true, hidden: true },
 	},
 	handler: async (args) => {
-		const client = getApiClient(args.token);
+		const client = getBuildApiClient(args.token);
 		try {
 			const response = await client.getBuilds({
 				appId: args.appId,

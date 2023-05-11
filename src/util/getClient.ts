@@ -1,7 +1,7 @@
 /* Copyright 2023 Hathora, Inc. */
 import fetch, { Headers, Request, Response } from "node-fetch";
 import FormData from "form-data";
-// @ts-expect-error
+
 globalThis.FormData = FormData;
 globalThis.fetch = fetch as any;
 globalThis.Headers = Headers as any;
@@ -22,8 +22,8 @@ import {
 	DeploymentV1Api,
 	LogV1Api,
 	ProcessesV1Api,
-	RoomV1Api,
-} from "../../sdk-client";
+	RoomV2Api,
+} from "../../sdk-client/index.js";
 
 export function getBuildApiClient(token: string) {
 	return new BuildV1Api(
@@ -81,7 +81,7 @@ export function getProcessesApiClient(token: string) {
 }
 
 export function getRoomApiClient(token: string) {
-	return new RoomV1Api(
+	return new RoomV2Api(
 		new Configuration({
 			headers: {
 				Authorization: `Bearer ${token}`,
