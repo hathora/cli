@@ -1,4 +1,6 @@
 /* Copyright 2023 Hathora, Inc. */
+import { request } from "http";
+
 import { CommandModule } from "yargs";
 
 import { getLogApiClient } from "../util/getClient.js";
@@ -62,21 +64,16 @@ export const logAllCommand: CommandModule<
 	handler: async (args) => {
 		const client = getLogApiClient(args.token);
 		try {
-			let fn:
-				| typeof client.getLogsForAppRaw
-				| typeof client.getLogsForDeploymentRaw
-				| typeof client.getLogsForProcessRaw = client.getLogsForAppRaw.bind(client);
+			// let fn:
+			// 	| typeof client.getLogsForAppRaw
+			// 	| typeof client.getLogsForDeploymentRaw
+			// 	| typeof client.getLogsForProcessRaw = client.getLogsForAppRaw.bind(client);
 
-			const request: any = {
-				appId: args.appId,
-				follow: args.follow,
-				timestamps: args.timestamps,
-				tailLines: args.tailLines,
-				region: args.region,
-			};
-			if (args.processId !== undefined) {
-				fn = client.getLogsForProcessRaw.bind(client);
-				request.processId = args.processId;
+			const { follow, timestamps, tailLines, region, appId, processId } = args;
+			if (processId !== undefined) {
+				const res = client.getLogsForProcess(appId, processId, follow, tailLines, { responseType: "stream" });
+				const res = await client.getLogsForProcessRaw({ ...request, processId: args.processId });
+				res.raw.body!.pipe();
 			} else if (args.deploymentId !== undefined) {
 				fn = client.getLogsForDeploymentRaw.bind(client);
 				request.deploymentId = args.deploymentId;

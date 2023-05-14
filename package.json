@@ -10,7 +10,7 @@
 	"scripts": {
 		"build:dev": "npm run generate:sdk-client && ts-node-esm ./scripts/build.ts --dev",
 		"build:prod": "npm run generate:sdk-client && ts-node-esm ./scripts/build.ts",
-		"generate:sdk-client": "openapi-generator-cli generate -i swagger.json -o sdk-client -g typescript-fetch",
+		"generate:sdk-client": "openapi-generator-cli generate -i swagger.json -o sdk-client -g typescript-axios",
 		"package": "npm run build:prod && pkg dist/cli.js --targets node14-linux-x64,node14-macos-x64,node14-win-x64 --output dist/hathora-cloud",
 		"lint": "eslint src/ --ext .js,.jsx,.ts,.tsx",
 		"lintfix": "eslint src/ --ext .js,.jsx,.ts,.tsx --fix",

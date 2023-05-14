@@ -7,7 +7,7 @@ import { hideBin } from "yargs/helpers";
 import yargs, { MiddlewareFunction } from "yargs";
 import chalk from "chalk";
 
-import { version } from "../package.json";
+import packageFile from "../package.json" assert { type: "json" };
 
 import { roomCommand } from "./commands/room/index.js";
 import { processesCommand } from "./commands/processes/index.js";
@@ -31,6 +31,8 @@ const tokenMiddleware: MiddlewareFunction = (argv) => {
 
 	argv.token = readFileSync(tokenFile).toString();
 };
+
+const { version } = packageFile;
 
 yargs(hideBin(process.argv))
 	.version(version)
