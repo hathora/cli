@@ -49,7 +49,7 @@ export const createBuildCommand: CommandModule<
 				file: fileContents, // readable stream works with the form-data package but the generated sdk wants a blob.
 			});
 			let body = buildResponse.raw.body!;
-			body.pipeThrough(process.stdout);
+			body["pipe"](process.stdout);
 			await buildResponse.value();
 		} catch (e) {
 			if (e instanceof ResponseError) {

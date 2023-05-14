@@ -1,6 +1,6 @@
 import { CommandModule } from "yargs";
 import { ERROR_MESSAGES } from "../../util/errors";
-import { getApiClient } from "../../util/getClient";
+import { getDeploymentApiClient } from "../../util/getClient";
 import { ResponseError } from "../../../sdk-client";
 
 export const createDeploymentCommand: CommandModule<
@@ -60,7 +60,7 @@ export const createDeploymentCommand: CommandModule<
 		token: { type: "string", demandOption: true, hidden: true },
 	},
 	handler: async (args) => {
-		const client = getApiClient(args.token);
+		const client = getDeploymentApiClient(args.token);
 		try {
 			const deployment = await client.createDeployment({
 				appId: args.appId,

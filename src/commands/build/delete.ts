@@ -1,7 +1,7 @@
 import { CommandModule } from "yargs";
 import { ERROR_MESSAGES } from "../../util/errors";
-import { getApiClient } from "../../util/getClient";
 import { ResponseError } from "../../../sdk-client";
+import { getBuildApiClient } from "../../util/getClient";
 
 export const buildDeleteCommand: CommandModule<
 	{},
@@ -23,7 +23,7 @@ export const buildDeleteCommand: CommandModule<
 		token: { type: "string", demandOption: true, hidden: true },
 	},
 	handler: async (args) => {
-		const client = getApiClient(args.token);
+		const client = getBuildApiClient(args.token);
 		try {
 			await client.deleteBuild({
 				appId: args.appId,

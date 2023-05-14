@@ -8,7 +8,7 @@
 		"experimentalDecorators": true,
 		"resolveJsonModule": true,
 		"skipLibCheck": true,
-		"exactOptionalPropertyTypes": true,
+		// "exactOptionalPropertyTypes": true,
 		"forceConsistentCasingInFileNames": true
 	},
 	"include": ["./src/**/*"]

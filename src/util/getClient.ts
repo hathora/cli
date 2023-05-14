@@ -20,6 +20,7 @@ import {
 	LogV1Api,
 	ProcessesV1Api,
 	RoomV1Api,
+	RoomV2Api,
 } from "../../sdk-client";
 
 export function getBuildApiClient(token: string) {
@@ -78,7 +79,7 @@ export function getProcessesApiClient(token: string) {
 }
 
 export function getRoomApiClient(token: string) {
-	return new RoomV1Api(
+	return new RoomV2Api(
 		new Configuration({
 			headers: {
 				Authorization: `Bearer ${token}`,

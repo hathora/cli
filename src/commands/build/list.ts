@@ -1,6 +1,6 @@
 import { CommandModule } from "yargs";
 import { ERROR_MESSAGES } from "../../util/errors";
-import { getApiClient } from "../../util/getClient";
+import { getBuildApiClient } from "../../util/getClient";
 import { ResponseError } from "../../../sdk-client";
 
 export const listBuildsCommand: CommandModule<
@@ -34,7 +34,7 @@ export const listBuildsCommand: CommandModule<
 		token: { type: "string", demandOption: true, hidden: true },
 	},
 	handler: async (args) => {
-		const client = getApiClient(args.token);
+		const client = getBuildApiClient(args.token);
 		try {
 			let response = await client.getBuilds({
 				appId: args.appId,
