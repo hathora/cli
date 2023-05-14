@@ -1,6 +1,6 @@
 import { CommandModule } from "yargs";
 import { ERROR_MESSAGES } from "../../util/errors";
-import { getApiClient } from "../../util/getClient";
+import { getProcessesApiClient } from "../../util/getClient";
 import { Region, ResponseError } from "../../../sdk-client";
 
 export const listProcessesCommand: CommandModule<
@@ -49,7 +49,7 @@ export const listProcessesCommand: CommandModule<
 		token: { type: "string", demandOption: true, hidden: true },
 	},
 	handler: async (args) => {
-		const client = getApiClient(args.token);
+		const client = getProcessesApiClient(args.token);
 		try {
 			const method =
 				args.target === "running"

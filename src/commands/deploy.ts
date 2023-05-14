@@ -1,6 +1,6 @@
 import { CommandModule } from "yargs";
 import { ERROR_MESSAGES } from "../util/errors";
-import { getApiClient } from "../util/getClient";
+import { getBuildApiClient, getDeploymentApiClient } from "../util/getClient";
 import { ResponseError } from "../../sdk-client";
 import { stat } from "fs/promises";
 import { createReadStream } from "fs";
@@ -62,9 +62,10 @@ export const deployCommand: CommandModule<
 		token: { type: "string", demandOption: true, hidden: true },
 	},
 	handler: async (args) => {
-		const client = getApiClient(args.token);
+		const deployClient = getDeploymentApiClient(args.token);
+		const buildClient = getBuildApiClient(args.token);
 		try {
-			const response = await client.createBuild({
+			const response = await buildClient.createBuild({
 				appId: args.appId,
 			});
 
@@ -76,10 +77,9 @@ export const deployCommand: CommandModule<
 				args.file === undefined
 					? await createTar()
 					: createReadStream(args.file);
-			const buildResponse = await client.runBuildRaw({
+			const buildResponse = await buildClient.runBuildRaw({
 				appId: args.appId,
 				buildId: response.buildId,
-				// @ts-expect-error
 				file: fileContents, // readable stream works with the form-data package but the generated sdk wants a blob.
 			});
 			let body = buildResponse.raw.body!;
@@ -88,7 +88,7 @@ export const deployCommand: CommandModule<
 			await buildResponse.value();
 
 			console.log("Creating deployment...");
-			const deployment = await client.createDeployment({
+			const deployment = await deployClient.createDeployment({
 				appId: args.appId,
 				buildId: response.buildId,
 				deploymentConfig: {

@@ -1,10 +1,10 @@
-import esbuild from "esbuild";
+const esbuild = require("esbuild");
 
 (async () => {
 	const isDev =
 		process.env.NODE_ENV === "development" || process.argv.includes("--dev");
 
-	const config: esbuild.BuildOptions = {
+	const config = {
 		entryPoints: ["src/cli.ts"],
 		bundle: true,
 		outfile: "dist/cli.js",
@@ -20,11 +20,10 @@ import esbuild from "esbuild";
 
 	if (isDev) {
 		const context = await esbuild.context(config);
-
 		context.watch();
 	} else {
 		await esbuild.build(config).then(async (res) => {
-			console.log(await esbuild.analyzeMetafile(res.metafile!));
+			console.log(await esbuild.analyzeMetafile(res.metafile));
 		});
 	}
 })();

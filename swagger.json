@@ -16,6 +16,10 @@
 			},
 			"Application": {
 				"properties": {
+					"deletedBy": {
+						"type": "string",
+						"nullable": true
+					},
 					"deletedAt": {
 						"type": "string",
 						"format": "date-time",
@@ -39,7 +43,9 @@
 										"type": "string"
 									}
 								},
-								"required": ["clientId"],
+								"required": [
+									"clientId"
+								],
 								"type": "object"
 							},
 							"nickname": {
@@ -62,6 +68,7 @@
 					}
 				},
 				"required": [
+					"deletedBy",
 					"deletedAt",
 					"createdAt",
 					"createdBy",
@@ -70,55 +77,6 @@
 					"appSecret",
 					"appId",
 					"appName"
-				],
-				"type": "object"
-			},
-			"TransportType": {
-				"type": "string",
-				"enum": ["tcp", "udp", "tls"]
-			},
-			"PlanName": {
-				"type": "string",
-				"enum": ["tiny", "small", "medium", "large"]
-			},
-			"DeploymentConfig": {
-				"properties": {
-					"env": {
-						"items": {
-							"properties": {
-								"value": {
-									"type": "string"
-								},
-								"name": {
-									"type": "string"
-								}
-							},
-							"required": ["value", "name"],
-							"type": "object"
-						},
-						"type": "array"
-					},
-					"roomsPerProcess": {
-						"type": "number",
-						"format": "double"
-					},
-					"planName": {
-						"$ref": "#/components/schemas/PlanName"
-					},
-					"transportType": {
-						"$ref": "#/components/schemas/TransportType"
-					},
-					"containerPort": {
-						"type": "number",
-						"format": "double"
-					}
-				},
-				"required": [
-					"env",
-					"roomsPerProcess",
-					"planName",
-					"transportType",
-					"containerPort"
 				],
 				"type": "object"
 			},
@@ -133,50 +91,135 @@
 				"type": "number",
 				"format": "double"
 			},
-			"Deployment": {
-				"allOf": [
-					{
-						"$ref": "#/components/schemas/DeploymentConfig"
-					},
-					{
-						"properties": {
-							"createdAt": {
-								"type": "string",
-								"format": "date-time"
-							},
-							"createdBy": {
-								"type": "string"
-							},
-							"requestedMemoryMB": {
-								"type": "number",
-								"format": "double"
-							},
-							"requestedCPU": {
-								"type": "number",
-								"format": "double"
-							},
-							"deploymentId": {
-								"$ref": "#/components/schemas/DeploymentId"
-							},
-							"buildId": {
-								"$ref": "#/components/schemas/BuildId"
-							},
-							"appId": {
-								"$ref": "#/components/schemas/AppId"
-							}
-						},
-						"required": [
-							"createdAt",
-							"createdBy",
-							"requestedMemoryMB",
-							"requestedCPU",
-							"deploymentId",
-							"buildId",
-							"appId"
-						],
-						"type": "object"
-					}
+			"TransportType": {
+				"type": "string",
+				"enum": [
+					"tcp",
+					"udp",
+					"tls"
 				]
+			},
+			"ContainerPort": {
+				"properties": {
+					"transportType": {
+						"$ref": "#/components/schemas/TransportType"
+					},
+					"port": {
+						"type": "integer",
+						"format": "int32",
+						"minimum": 1,
+						"maximum": 65535
+					},
+					"name": {
+						"type": "string",
+						"minLength": 1,
+						"maxLength": 100,
+						"pattern": "^[a-z][a-z0-9-]*$"
+					}
+				},
+				"required": [
+					"transportType",
+					"port",
+					"name"
+				],
+				"type": "object"
+			},
+			"PlanName": {
+				"type": "string",
+				"enum": [
+					"tiny",
+					"small",
+					"medium",
+					"large"
+				]
+			},
+			"Deployment": {
+				"properties": {
+					"env": {
+						"items": {
+							"properties": {
+								"value": {
+									"type": "string"
+								},
+								"name": {
+									"type": "string"
+								}
+							},
+							"required": [
+								"value",
+								"name"
+							],
+							"type": "object"
+						},
+						"type": "array"
+					},
+					"roomsPerProcess": {
+						"type": "number",
+						"format": "double"
+					},
+					"planName": {
+						"$ref": "#/components/schemas/PlanName"
+					},
+					"additionalContainerPorts": {
+						"items": {
+							"$ref": "#/components/schemas/ContainerPort"
+						},
+						"type": "array"
+					},
+					"defaultContainerPort": {
+						"$ref": "#/components/schemas/ContainerPort"
+					},
+					"transportType": {
+						"$ref": "#/components/schemas/TransportType",
+						"deprecated": true
+					},
+					"containerPort": {
+						"type": "number",
+						"format": "double",
+						"deprecated": true
+					},
+					"createdAt": {
+						"type": "string",
+						"format": "date-time"
+					},
+					"createdBy": {
+						"type": "string"
+					},
+					"requestedMemoryMB": {
+						"type": "number",
+						"format": "double"
+					},
+					"requestedCPU": {
+						"type": "number",
+						"format": "double"
+					},
+					"deploymentId": {
+						"$ref": "#/components/schemas/DeploymentId"
+					},
+					"buildId": {
+						"$ref": "#/components/schemas/BuildId"
+					},
+					"appId": {
+						"$ref": "#/components/schemas/AppId"
+					}
+				},
+				"required": [
+					"env",
+					"roomsPerProcess",
+					"planName",
+					"additionalContainerPorts",
+					"defaultContainerPort",
+					"transportType",
+					"containerPort",
+					"createdAt",
+					"createdBy",
+					"requestedMemoryMB",
+					"requestedCPU",
+					"deploymentId",
+					"buildId",
+					"appId"
+				],
+				"type": "object"
 			},
 			"ApplicationWithDeployment": {
 				"allOf": [
@@ -189,10 +232,81 @@
 								"$ref": "#/components/schemas/Deployment"
 							}
 						},
-						"required": ["deployment"],
+						"required": [
+							"deployment"
+						],
 						"type": "object"
 					}
 				]
+			},
+			"AppConfig": {
+				"properties": {
+					"authConfiguration": {
+						"properties": {
+							"google": {
+								"properties": {
+									"clientId": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"clientId"
+								],
+								"type": "object"
+							},
+							"nickname": {
+								"$ref": "#/components/schemas/Record_string.never_"
+							},
+							"anonymous": {
+								"$ref": "#/components/schemas/Record_string.never_"
+							}
+						},
+						"type": "object"
+					},
+					"appName": {
+						"type": "string",
+						"maxLength": 32,
+						"pattern": "^[a-z0-9-]+$"
+					}
+				},
+				"required": [
+					"authConfiguration",
+					"appName"
+				],
+				"type": "object"
+			},
+			"LoginResponse": {
+				"properties": {
+					"token": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"token"
+				],
+				"type": "object"
+			},
+			"LoginNicknameRequest": {
+				"properties": {
+					"nickname": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"nickname"
+				],
+				"type": "object"
+			},
+			"LoginGoogleRequest": {
+				"properties": {
+					"idToken": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"idToken"
+				],
+				"type": "object"
 			},
 			"Region": {
 				"type": "string",
@@ -205,7 +319,8 @@
 					"Mumbai",
 					"Singapore",
 					"Tokyo",
-					"Sydney"
+					"Sydney",
+					"Sao_Paulo"
 				]
 			},
 			"Build": {
@@ -220,7 +335,10 @@
 									"$ref": "#/components/schemas/Region"
 								}
 							},
-							"required": ["containerTag", "region"],
+							"required": [
+								"containerTag",
+								"region"
+							],
 							"type": "object"
 						},
 						"type": "array"
@@ -231,7 +349,12 @@
 					},
 					"status": {
 						"type": "string",
-						"enum": ["created", "running", "succeeded", "failed"]
+						"enum": [
+							"created",
+							"running",
+							"succeeded",
+							"failed"
+						]
 					},
 					"deletedAt": {
 						"type": "string",
@@ -276,11 +399,105 @@
 				],
 				"type": "object"
 			},
+			"DeploymentConfig": {
+				"properties": {
+					"env": {
+						"items": {
+							"properties": {
+								"value": {
+									"type": "string",
+									"maxLength": 5000
+								},
+								"name": {
+									"type": "string",
+									"minLength": 1,
+									"maxLength": 100,
+									"pattern": "^[a-zA-Z_][a-zA-Z0-9_]*$"
+								}
+							},
+							"required": [
+								"value",
+								"name"
+							],
+							"type": "object"
+						},
+						"type": "array",
+						"maxItems": 100
+					},
+					"roomsPerProcess": {
+						"type": "integer",
+						"format": "int32",
+						"minimum": 1,
+						"maximum": 10000
+					},
+					"planName": {
+						"$ref": "#/components/schemas/PlanName"
+					},
+					"additionalContainerPorts": {
+						"items": {
+							"$ref": "#/components/schemas/ContainerPort"
+						},
+						"type": "array",
+						"maxItems": 2
+					},
+					"transportType": {
+						"$ref": "#/components/schemas/TransportType"
+					},
+					"containerPort": {
+						"type": "integer",
+						"format": "int32",
+						"minimum": 1,
+						"maximum": 65535
+					}
+				},
+				"required": [
+					"env",
+					"roomsPerProcess",
+					"planName",
+					"transportType",
+					"containerPort"
+				],
+				"type": "object"
+			},
+			"DiscoveryResponse": {
+				"items": {
+					"properties": {
+						"port": {
+							"type": "number",
+							"format": "double"
+						},
+						"host": {
+							"type": "string"
+						},
+						"region": {
+							"$ref": "#/components/schemas/Region"
+						}
+					},
+					"required": [
+						"port",
+						"host",
+						"region"
+					],
+					"type": "object"
+				},
+				"type": "array"
+			},
 			"RoomId": {
-				"type": "string"
+				"type": "string",
+				"minLength": 1,
+				"maxLength": 100,
+				"pattern": "^[a-zA-Z0-9_-]*$"
 			},
 			"Lobby": {
 				"properties": {
+					"state": {
+						"additionalProperties": false,
+						"type": "object"
+					},
+					"initialConfig": {
+						"additionalProperties": false,
+						"type": "object"
+					},
 					"createdAt": {
 						"type": "string",
 						"format": "date-time"
@@ -293,7 +510,11 @@
 					},
 					"visibility": {
 						"type": "string",
-						"enum": ["private", "public"]
+						"enum": [
+							"private",
+							"public",
+							"local"
+						]
 					},
 					"region": {
 						"$ref": "#/components/schemas/Region"
@@ -306,6 +527,7 @@
 					}
 				},
 				"required": [
+					"initialConfig",
 					"createdAt",
 					"createdBy",
 					"local",
@@ -315,6 +537,50 @@
 					"appId"
 				],
 				"type": "object"
+			},
+			"CreateLobbyRequest": {
+				"properties": {
+					"visibility": {
+						"type": "string",
+						"enum": [
+							"public",
+							"private",
+							"local"
+						]
+					},
+					"initialConfig": {
+						"additionalProperties": false,
+						"type": "object"
+					},
+					"region": {
+						"$ref": "#/components/schemas/Region"
+					}
+				},
+				"required": [
+					"visibility",
+					"initialConfig",
+					"region"
+				],
+				"type": "object"
+			},
+			"SetLobbyStateRequest": {
+				"properties": {
+					"state": {
+						"additionalProperties": false,
+						"type": "object"
+					}
+				},
+				"required": [
+					"state"
+				],
+				"type": "object"
+			},
+			"TailLines": {
+				"type": "integer",
+				"format": "int32",
+				"default": "100",
+				"minimum": 1,
+				"maximum": 10000
 			},
 			"ProcessId": {
 				"type": "string"
@@ -330,7 +596,10 @@
 						"format": "double"
 					}
 				},
-				"required": ["value", "timestamp"],
+				"required": [
+					"value",
+					"timestamp"
+				],
 				"type": "object"
 			},
 			"Record_Partial_MetricName_.MetricValue-Array_": {
@@ -346,6 +615,18 @@
 							"$ref": "#/components/schemas/MetricValue"
 						},
 						"type": "array"
+					},
+					"rate_egress": {
+						"items": {
+							"$ref": "#/components/schemas/MetricValue"
+						},
+						"type": "array"
+					},
+					"total_egress": {
+						"items": {
+							"$ref": "#/components/schemas/MetricValue"
+						},
+						"type": "array"
 					}
 				},
 				"type": "object",
@@ -356,10 +637,43 @@
 			},
 			"MetricName": {
 				"type": "string",
-				"enum": ["cpu", "memory"]
+				"enum": [
+					"cpu",
+					"memory",
+					"rate_egress",
+					"total_egress"
+				]
+			},
+			"ExposedPort": {
+				"properties": {
+					"transportType": {
+						"$ref": "#/components/schemas/TransportType"
+					},
+					"port": {
+						"type": "number",
+						"format": "double"
+					},
+					"host": {
+						"type": "string"
+					},
+					"name": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"transportType",
+					"port",
+					"host",
+					"name"
+				],
+				"type": "object"
 			},
 			"Process": {
 				"properties": {
+					"egressedBytes": {
+						"type": "number",
+						"format": "double"
+					},
 					"idleSince": {
 						"type": "string",
 						"format": "date-time",
@@ -399,12 +713,23 @@
 						"type": "number",
 						"format": "double"
 					},
+					"additionalExposedPorts": {
+						"items": {
+							"$ref": "#/components/schemas/ExposedPort"
+						},
+						"type": "array"
+					},
+					"exposedPort": {
+						"$ref": "#/components/schemas/ExposedPort"
+					},
 					"port": {
 						"type": "number",
-						"format": "double"
+						"format": "double",
+						"deprecated": true
 					},
 					"host": {
-						"type": "string"
+						"type": "string",
+						"deprecated": true
 					},
 					"region": {
 						"$ref": "#/components/schemas/Region"
@@ -420,6 +745,7 @@
 					}
 				},
 				"required": [
+					"egressedBytes",
 					"idleSince",
 					"activeConnections",
 					"roomSlotsAvailable",
@@ -429,6 +755,7 @@
 					"startedAt",
 					"startingAt",
 					"roomsPerProcess",
+					"additionalExposedPorts",
 					"port",
 					"host",
 					"region",
@@ -440,7 +767,12 @@
 			},
 			"RoomStatus": {
 				"type": "string",
-				"enum": ["scheduling", "active", "suspended", "destroyed"]
+				"enum": [
+					"scheduling",
+					"active",
+					"suspended",
+					"destroyed"
+				]
 			},
 			"RoomAllocationId": {
 				"type": "string"
@@ -491,7 +823,12 @@
 						"nullable": true
 					}
 				},
-				"required": ["appId", "roomId", "status", "currentAllocation"],
+				"required": [
+					"appId",
+					"roomId",
+					"status",
+					"currentAllocation"
+				],
 				"type": "object",
 				"description": "From T, pick a set of properties whose keys are in the union K"
 			},
@@ -520,10 +857,24 @@
 								"format": "double"
 							}
 						},
-						"required": ["rooms", "totalRooms"],
+						"required": [
+							"rooms",
+							"totalRooms"
+						],
 						"type": "object"
 					}
 				]
+			},
+			"CreateRoomRequest": {
+				"properties": {
+					"region": {
+						"$ref": "#/components/schemas/Region"
+					}
+				},
+				"required": [
+					"region"
+				],
+				"type": "object"
 			},
 			"Room": {
 				"properties": {
@@ -564,21 +915,28 @@
 				"properties": {
 					"status": {
 						"type": "string",
-						"enum": ["starting"],
+						"enum": [
+							"starting"
+						],
 						"nullable": false
 					},
 					"roomId": {
 						"$ref": "#/components/schemas/RoomId"
 					}
 				},
-				"required": ["status", "roomId"],
+				"required": [
+					"status",
+					"roomId"
+				],
 				"type": "object"
 			},
 			"ActiveConnectionInfo": {
 				"properties": {
 					"status": {
 						"type": "string",
-						"enum": ["active"],
+						"enum": [
+							"active"
+						],
 						"nullable": false
 					},
 					"transportType": {
@@ -595,7 +953,13 @@
 						"$ref": "#/components/schemas/RoomId"
 					}
 				},
-				"required": ["status", "transportType", "port", "host", "roomId"],
+				"required": [
+					"status",
+					"transportType",
+					"port",
+					"host",
+					"roomId"
+				],
 				"type": "object"
 			},
 			"ConnectionInfo": {
@@ -607,6 +971,35 @@
 						"$ref": "#/components/schemas/ActiveConnectionInfo"
 					}
 				]
+			},
+			"ConnectionInfoV2": {
+				"properties": {
+					"additionalExposedPorts": {
+						"items": {
+							"$ref": "#/components/schemas/ExposedPort"
+						},
+						"type": "array"
+					},
+					"exposedPort": {
+						"$ref": "#/components/schemas/ExposedPort"
+					},
+					"status": {
+						"type": "string",
+						"enum": [
+							"starting",
+							"active"
+						]
+					},
+					"roomId": {
+						"$ref": "#/components/schemas/RoomId"
+					}
+				},
+				"required": [
+					"additionalExposedPorts",
+					"status",
+					"roomId"
+				],
+				"type": "object"
 			}
 		},
 		"securitySchemes": {
@@ -618,7 +1011,7 @@
 		}
 	},
 	"info": {
-		"title": "hathora-coordinator",
+		"title": "Hathora Cloud API",
 		"version": "0.0.1",
 		"contact": {}
 	},
@@ -642,6 +1035,9 @@
 						}
 					}
 				},
+				"tags": [
+					"AppV1"
+				],
 				"security": [
 					{
 						"auth0": []
@@ -654,8 +1050,8 @@
 			"post": {
 				"operationId": "CreateApp",
 				"responses": {
-					"200": {
-						"description": "Ok",
+					"201": {
+						"description": "",
 						"content": {
 							"application/json": {
 								"schema": {
@@ -685,6 +1081,9 @@
 						}
 					}
 				},
+				"tags": [
+					"AppV1"
+				],
 				"security": [
 					{
 						"auth0": []
@@ -696,33 +1095,7 @@
 					"content": {
 						"application/json": {
 							"schema": {
-								"properties": {
-									"authConfiguration": {
-										"properties": {
-											"google": {
-												"properties": {
-													"clientId": {
-														"type": "string"
-													}
-												},
-												"required": ["clientId"],
-												"type": "object"
-											},
-											"nickname": {
-												"$ref": "#/components/schemas/Record_string.never_"
-											},
-											"anonymous": {
-												"$ref": "#/components/schemas/Record_string.never_"
-											}
-										},
-										"type": "object"
-									},
-									"appName": {
-										"type": "string"
-									}
-								},
-								"required": ["authConfiguration", "appName"],
-								"type": "object"
+								"$ref": "#/components/schemas/AppConfig"
 							}
 						}
 					}
@@ -764,6 +1137,9 @@
 						}
 					}
 				},
+				"tags": [
+					"AppV1"
+				],
 				"security": [
 					{
 						"auth0": []
@@ -784,33 +1160,7 @@
 					"content": {
 						"application/json": {
 							"schema": {
-								"properties": {
-									"authConfiguration": {
-										"properties": {
-											"google": {
-												"properties": {
-													"clientId": {
-														"type": "string"
-													}
-												},
-												"required": ["clientId"],
-												"type": "object"
-											},
-											"nickname": {
-												"$ref": "#/components/schemas/Record_string.never_"
-											},
-											"anonymous": {
-												"$ref": "#/components/schemas/Record_string.never_"
-											}
-										},
-										"type": "object"
-									},
-									"appName": {
-										"type": "string"
-									}
-								},
-								"required": ["authConfiguration", "appName"],
-								"type": "object"
+								"$ref": "#/components/schemas/AppConfig"
 							}
 						}
 					}
@@ -842,6 +1192,9 @@
 						}
 					}
 				},
+				"tags": [
+					"AppV1"
+				],
 				"security": [
 					{
 						"auth0": []
@@ -887,6 +1240,9 @@
 						}
 					}
 				},
+				"tags": [
+					"AppV1"
+				],
 				"security": [
 					{
 						"auth0": []
@@ -913,13 +1269,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"properties": {
-										"token": {
-											"type": "string"
-										}
-									},
-									"required": ["token"],
-									"type": "object"
+									"$ref": "#/components/schemas/LoginResponse"
 								}
 							}
 						}
@@ -935,6 +1285,9 @@
 						}
 					}
 				},
+				"tags": [
+					"AuthV1"
+				],
 				"security": [],
 				"parameters": [
 					{
@@ -957,13 +1310,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"properties": {
-										"token": {
-											"type": "string"
-										}
-									},
-									"required": ["token"],
-									"type": "object"
+									"$ref": "#/components/schemas/LoginResponse"
 								}
 							}
 						}
@@ -979,6 +1326,9 @@
 						}
 					}
 				},
+				"tags": [
+					"AuthV1"
+				],
 				"security": [],
 				"parameters": [
 					{
@@ -995,13 +1345,7 @@
 					"content": {
 						"application/json": {
 							"schema": {
-								"properties": {
-									"nickname": {
-										"type": "string"
-									}
-								},
-								"required": ["nickname"],
-								"type": "object"
+								"$ref": "#/components/schemas/LoginNicknameRequest"
 							}
 						}
 					}
@@ -1017,13 +1361,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"properties": {
-										"token": {
-											"type": "string"
-										}
-									},
-									"required": ["token"],
-									"type": "object"
+									"$ref": "#/components/schemas/LoginResponse"
 								}
 							}
 						}
@@ -1049,6 +1387,9 @@
 						}
 					}
 				},
+				"tags": [
+					"AuthV1"
+				],
 				"security": [],
 				"parameters": [
 					{
@@ -1065,13 +1406,7 @@
 					"content": {
 						"application/json": {
 							"schema": {
-								"properties": {
-									"idToken": {
-										"type": "string"
-									}
-								},
-								"required": ["idToken"],
-								"type": "object"
+								"$ref": "#/components/schemas/LoginGoogleRequest"
 							}
 						}
 					}
@@ -1106,6 +1441,9 @@
 						}
 					}
 				},
+				"tags": [
+					"BuildV1"
+				],
 				"security": [
 					{
 						"auth0": []
@@ -1148,6 +1486,9 @@
 						}
 					}
 				},
+				"tags": [
+					"BuildV1"
+				],
 				"security": [
 					{
 						"auth0": []
@@ -1177,8 +1518,8 @@
 			"post": {
 				"operationId": "CreateBuild",
 				"responses": {
-					"200": {
-						"description": "Ok",
+					"201": {
+						"description": "",
 						"content": {
 							"application/json": {
 								"schema": {
@@ -1218,6 +1559,9 @@
 						}
 					}
 				},
+				"tags": [
+					"BuildV1"
+				],
 				"security": [
 					{
 						"auth0": []
@@ -1271,6 +1615,9 @@
 						}
 					}
 				},
+				"tags": [
+					"BuildV1"
+				],
 				"security": [
 					{
 						"auth0": []
@@ -1306,7 +1653,9 @@
 										"format": "binary"
 									}
 								},
-								"required": ["file"]
+								"required": [
+									"file"
+								]
 							}
 						}
 					}
@@ -1351,6 +1700,9 @@
 						}
 					}
 				},
+				"tags": [
+					"BuildV1"
+				],
 				"security": [
 					{
 						"auth0": []
@@ -1404,6 +1756,9 @@
 						}
 					}
 				},
+				"tags": [
+					"DeploymentV1"
+				],
 				"security": [
 					{
 						"auth0": []
@@ -1446,6 +1801,9 @@
 						}
 					}
 				},
+				"tags": [
+					"DeploymentV1"
+				],
 				"security": [
 					{
 						"auth0": []
@@ -1475,8 +1833,8 @@
 			"post": {
 				"operationId": "CreateDeployment",
 				"responses": {
-					"200": {
-						"description": "Ok",
+					"201": {
+						"description": "",
 						"content": {
 							"application/json": {
 								"schema": {
@@ -1485,7 +1843,7 @@
 							}
 						}
 					},
-					"404": {
+					"400": {
 						"description": "",
 						"content": {
 							"application/json": {
@@ -1495,7 +1853,7 @@
 							}
 						}
 					},
-					"422": {
+					"404": {
 						"description": "",
 						"content": {
 							"application/json": {
@@ -1516,6 +1874,9 @@
 						}
 					}
 				},
+				"tags": [
+					"DeploymentV1"
+				],
 				"security": [
 					{
 						"auth0": []
@@ -1551,9 +1912,31 @@
 				}
 			}
 		},
+		"/discovery/v1/ping": {
+			"get": {
+				"operationId": "GetPingServiceEndpoints",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/DiscoveryResponse"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"DiscoveryV1"
+				],
+				"security": [],
+				"parameters": []
+			}
+		},
 		"/lobby/v1/{appId}/create/private": {
 			"post": {
-				"operationId": "CreatePrivateLobby",
+				"operationId": "CreatePrivateLobbyDeprecated",
 				"responses": {
 					"200": {
 						"description": "Ok",
@@ -1561,6 +1944,16 @@
 							"application/json": {
 								"schema": {
 									"$ref": "#/components/schemas/RoomId"
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string"
 								}
 							}
 						}
@@ -1585,6 +1978,26 @@
 							}
 						}
 					},
+					"422": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string"
+								}
+							}
+						}
+					},
+					"429": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string"
+								}
+							}
+						}
+					},
 					"500": {
 						"description": "",
 						"content": {
@@ -1596,6 +2009,10 @@
 						}
 					}
 				},
+				"tags": [
+					"LobbyV1"
+				],
+				"deprecated": true,
 				"security": [],
 				"parameters": [
 					{
@@ -1636,7 +2053,7 @@
 		},
 		"/lobby/v1/{appId}/create/public": {
 			"post": {
-				"operationId": "CreatePublicLobby",
+				"operationId": "CreatePublicLobbyDeprecated",
 				"responses": {
 					"200": {
 						"description": "Ok",
@@ -1644,6 +2061,16 @@
 							"application/json": {
 								"schema": {
 									"$ref": "#/components/schemas/RoomId"
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string"
 								}
 							}
 						}
@@ -1668,6 +2095,26 @@
 							}
 						}
 					},
+					"422": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string"
+								}
+							}
+						}
+					},
+					"429": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string"
+								}
+							}
+						}
+					},
 					"500": {
 						"description": "",
 						"content": {
@@ -1679,6 +2126,10 @@
 						}
 					}
 				},
+				"tags": [
+					"LobbyV1"
+				],
+				"deprecated": true,
 				"security": [],
 				"parameters": [
 					{
@@ -1719,7 +2170,7 @@
 		},
 		"/lobby/v1/{appId}/list": {
 			"get": {
-				"operationId": "ListActivePublicLobbies",
+				"operationId": "ListActivePublicLobbiesDeprecated",
 				"responses": {
 					"200": {
 						"description": "Ok",
@@ -1755,6 +2206,10 @@
 						}
 					}
 				},
+				"tags": [
+					"LobbyV1"
+				],
+				"deprecated": true,
 				"security": [],
 				"parameters": [
 					{
@@ -1793,6 +2248,680 @@
 				]
 			}
 		},
+		"/lobby/v2/{appId}/create/private": {
+			"post": {
+				"operationId": "CreatePrivateLobby",
+				"responses": {
+					"201": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Lobby"
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string"
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string"
+								}
+							}
+						}
+					},
+					"429": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"LobbyV2"
+				],
+				"deprecated": true,
+				"security": [],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "appId",
+						"required": true,
+						"schema": {
+							"$ref": "#/components/schemas/AppId"
+						}
+					},
+					{
+						"in": "header",
+						"name": "Authorization",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "roomId",
+						"required": false,
+						"schema": {
+							"$ref": "#/components/schemas/RoomId"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"initialConfig": {
+										"additionalProperties": false,
+										"type": "object"
+									},
+									"region": {
+										"$ref": "#/components/schemas/Region"
+									}
+								},
+								"required": [
+									"initialConfig",
+									"region"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/lobby/v2/{appId}/create/public": {
+			"post": {
+				"operationId": "CreatePublicLobby",
+				"responses": {
+					"201": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Lobby"
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string"
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string"
+								}
+							}
+						}
+					},
+					"429": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"LobbyV2"
+				],
+				"deprecated": true,
+				"security": [],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "appId",
+						"required": true,
+						"schema": {
+							"$ref": "#/components/schemas/AppId"
+						}
+					},
+					{
+						"in": "header",
+						"name": "Authorization",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "roomId",
+						"required": false,
+						"schema": {
+							"$ref": "#/components/schemas/RoomId"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"initialConfig": {
+										"additionalProperties": false,
+										"type": "object"
+									},
+									"region": {
+										"$ref": "#/components/schemas/Region"
+									}
+								},
+								"required": [
+									"initialConfig",
+									"region"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/lobby/v2/{appId}/create/local": {
+			"post": {
+				"operationId": "CreateLocalLobby",
+				"responses": {
+					"201": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Lobby"
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string"
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string"
+								}
+							}
+						}
+					},
+					"429": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"LobbyV2"
+				],
+				"deprecated": true,
+				"security": [],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "appId",
+						"required": true,
+						"schema": {
+							"$ref": "#/components/schemas/AppId"
+						}
+					},
+					{
+						"in": "header",
+						"name": "Authorization",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "roomId",
+						"required": false,
+						"schema": {
+							"$ref": "#/components/schemas/RoomId"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"initialConfig": {
+										"additionalProperties": false,
+										"type": "object"
+									},
+									"region": {
+										"$ref": "#/components/schemas/Region"
+									}
+								},
+								"required": [
+									"initialConfig",
+									"region"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/lobby/v2/{appId}/create": {
+			"post": {
+				"operationId": "CreateLobby",
+				"responses": {
+					"201": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Lobby"
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string"
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string"
+								}
+							}
+						}
+					},
+					"429": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"LobbyV2"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "appId",
+						"required": true,
+						"schema": {
+							"$ref": "#/components/schemas/AppId"
+						}
+					},
+					{
+						"in": "header",
+						"name": "Authorization",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "roomId",
+						"required": false,
+						"schema": {
+							"$ref": "#/components/schemas/RoomId"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/CreateLobbyRequest"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/lobby/v2/{appId}/list/public": {
+			"get": {
+				"operationId": "ListActivePublicLobbies",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"items": {
+										"$ref": "#/components/schemas/Lobby"
+									},
+									"type": "array"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"LobbyV2"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "appId",
+						"required": true,
+						"schema": {
+							"$ref": "#/components/schemas/AppId"
+						}
+					},
+					{
+						"in": "query",
+						"name": "region",
+						"required": false,
+						"schema": {
+							"$ref": "#/components/schemas/Region"
+						}
+					}
+				]
+			}
+		},
+		"/lobby/v2/{appId}/info/{roomId}": {
+			"get": {
+				"operationId": "GetLobbyInfo",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Lobby"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"LobbyV2"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "appId",
+						"required": true,
+						"schema": {
+							"$ref": "#/components/schemas/AppId"
+						}
+					},
+					{
+						"in": "path",
+						"name": "roomId",
+						"required": true,
+						"schema": {
+							"$ref": "#/components/schemas/RoomId"
+						}
+					}
+				]
+			}
+		},
+		"/lobby/v2/{appId}/setState/{roomId}": {
+			"post": {
+				"operationId": "SetLobbyState",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Lobby"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string"
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"LobbyV2"
+				],
+				"security": [
+					{
+						"auth0": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "appId",
+						"required": true,
+						"schema": {
+							"$ref": "#/components/schemas/AppId"
+						}
+					},
+					{
+						"in": "path",
+						"name": "roomId",
+						"required": true,
+						"schema": {
+							"$ref": "#/components/schemas/RoomId"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/SetLobbyStateRequest"
+							}
+						}
+					}
+				}
+			}
+		},
 		"/logs/v1/{appId}/all": {
 			"get": {
 				"operationId": "GetLogsForApp",
@@ -1819,6 +2948,9 @@
 						}
 					}
 				},
+				"tags": [
+					"LogV1"
+				],
 				"security": [
 					{
 						"auth0": []
@@ -1847,9 +2979,7 @@
 						"name": "tailLines",
 						"required": false,
 						"schema": {
-							"default": 100,
-							"format": "double",
-							"type": "number"
+							"$ref": "#/components/schemas/TailLines"
 						}
 					},
 					{
@@ -1889,6 +3019,9 @@
 						}
 					}
 				},
+				"tags": [
+					"LogV1"
+				],
 				"security": [
 					{
 						"auth0": []
@@ -1925,9 +3058,7 @@
 						"name": "tailLines",
 						"required": false,
 						"schema": {
-							"default": 100,
-							"format": "double",
-							"type": "number"
+							"$ref": "#/components/schemas/TailLines"
 						}
 					}
 				]
@@ -1941,7 +3072,10 @@
 						"description": "Ok",
 						"content": {
 							"text/plain": {
-								"schema": {}
+								"schema": {
+									"type": "string",
+									"format": "byte"
+								}
 							}
 						}
 					},
@@ -1956,6 +3090,9 @@
 						}
 					}
 				},
+				"tags": [
+					"LogV1"
+				],
 				"security": [
 					{
 						"auth0": []
@@ -1992,9 +3129,7 @@
 						"name": "tailLines",
 						"required": false,
 						"schema": {
-							"default": 100,
-							"format": "double",
-							"type": "number"
+							"$ref": "#/components/schemas/TailLines"
 						}
 					}
 				]
@@ -2035,6 +3170,9 @@
 						}
 					}
 				},
+				"tags": [
+					"MetricsV1"
+				],
 				"security": [
 					{
 						"auth0": []
@@ -2062,7 +3200,11 @@
 						"name": "metrics",
 						"required": false,
 						"schema": {
-							"default": ["cpu", "memory"],
+							"default": [
+								"cpu",
+								"memory",
+								"rate_egress"
+							],
 							"type": "array",
 							"items": {
 								"$ref": "#/components/schemas/MetricName"
@@ -2074,8 +3216,8 @@
 						"name": "end",
 						"required": false,
 						"schema": {
-							"format": "double",
-							"type": "number"
+							"format": "int32",
+							"type": "integer"
 						}
 					},
 					{
@@ -2083,8 +3225,8 @@
 						"name": "start",
 						"required": false,
 						"schema": {
-							"format": "double",
-							"type": "number"
+							"format": "int32",
+							"type": "integer"
 						}
 					},
 					{
@@ -2093,8 +3235,8 @@
 						"required": false,
 						"schema": {
 							"default": 60,
-							"format": "double",
-							"type": "number"
+							"format": "int32",
+							"type": "integer"
 						}
 					}
 				]
@@ -2128,6 +3270,9 @@
 						}
 					}
 				},
+				"tags": [
+					"ProcessesV1"
+				],
 				"security": [
 					{
 						"auth0": []
@@ -2181,6 +3326,9 @@
 						}
 					}
 				},
+				"tags": [
+					"ProcessesV1"
+				],
 				"security": [
 					{
 						"auth0": []
@@ -2231,6 +3379,9 @@
 						}
 					}
 				},
+				"tags": [
+					"ProcessesV1"
+				],
 				"security": [
 					{
 						"auth0": []
@@ -2258,14 +3409,24 @@
 		},
 		"/rooms/v1/{appId}/create": {
 			"post": {
-				"operationId": "CreateRoom",
+				"operationId": "CreateRoomDeprecated",
 				"responses": {
-					"200": {
-						"description": "Ok",
+					"201": {
+						"description": "",
 						"content": {
 							"application/json": {
 								"schema": {
 									"$ref": "#/components/schemas/RoomId"
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string"
 								}
 							}
 						}
@@ -2291,6 +3452,10 @@
 						}
 					}
 				},
+				"tags": [
+					"RoomV1"
+				],
+				"deprecated": true,
 				"security": [
 					{
 						"auth0": []
@@ -2304,6 +3469,14 @@
 						"schema": {
 							"$ref": "#/components/schemas/AppId"
 						}
+					},
+					{
+						"in": "query",
+						"name": "roomId",
+						"required": false,
+						"schema": {
+							"$ref": "#/components/schemas/RoomId"
+						}
 					}
 				],
 				"requestBody": {
@@ -2311,13 +3484,7 @@
 					"content": {
 						"application/json": {
 							"schema": {
-								"properties": {
-									"region": {
-										"$ref": "#/components/schemas/Region"
-									}
-								},
-								"required": ["region"],
-								"type": "object"
+								"$ref": "#/components/schemas/CreateRoomRequest"
 							}
 						}
 					}
@@ -2326,7 +3493,7 @@
 		},
 		"/rooms/v1/{appId}/info/{roomId}": {
 			"get": {
-				"operationId": "GetRoomInfo",
+				"operationId": "GetRoomInfoDeprecated",
 				"responses": {
 					"200": {
 						"description": "Ok",
@@ -2349,6 +3516,10 @@
 						}
 					}
 				},
+				"tags": [
+					"RoomV1"
+				],
+				"deprecated": true,
 				"security": [
 					{
 						"auth0": []
@@ -2376,7 +3547,7 @@
 		},
 		"/rooms/v1/{appId}/list/{processId}/active": {
 			"get": {
-				"operationId": "GetActiveRoomsForProcess",
+				"operationId": "GetActiveRoomsForProcessDeprecated",
 				"responses": {
 					"200": {
 						"description": "Ok",
@@ -2402,6 +3573,10 @@
 						}
 					}
 				},
+				"tags": [
+					"RoomV1"
+				],
+				"deprecated": true,
 				"security": [
 					{
 						"auth0": []
@@ -2429,7 +3604,7 @@
 		},
 		"/rooms/v1/{appId}/list/{processId}/inactive": {
 			"get": {
-				"operationId": "GetInactiveRoomsForProcess",
+				"operationId": "GetInactiveRoomsForProcessDeprecated",
 				"responses": {
 					"200": {
 						"description": "Ok",
@@ -2455,6 +3630,10 @@
 						}
 					}
 				},
+				"tags": [
+					"RoomV1"
+				],
+				"deprecated": true,
 				"security": [
 					{
 						"auth0": []
@@ -2482,7 +3661,7 @@
 		},
 		"/rooms/v1/{appId}/destroy/{roomId}": {
 			"post": {
-				"operationId": "DestroyRoom",
+				"operationId": "DestroyRoomDeprecated",
 				"responses": {
 					"204": {
 						"description": "No content"
@@ -2508,6 +3687,10 @@
 						}
 					}
 				},
+				"tags": [
+					"RoomV1"
+				],
+				"deprecated": true,
 				"security": [
 					{
 						"auth0": []
@@ -2535,7 +3718,7 @@
 		},
 		"/rooms/v1/{appId}/suspend/{roomId}": {
 			"post": {
-				"operationId": "SuspendRoom",
+				"operationId": "SuspendRoomDeprecated",
 				"responses": {
 					"204": {
 						"description": "No content"
@@ -2561,6 +3744,10 @@
 						}
 					}
 				},
+				"tags": [
+					"RoomV1"
+				],
+				"deprecated": true,
 				"security": [
 					{
 						"auth0": []
@@ -2588,7 +3775,7 @@
 		},
 		"/rooms/v1/{appId}/connectioninfo/{roomId}": {
 			"get": {
-				"operationId": "GetConnectionInfo",
+				"operationId": "GetConnectionInfoDeprecated",
 				"responses": {
 					"200": {
 						"description": "Ok",
@@ -2600,7 +3787,7 @@
 							}
 						}
 					},
-					"404": {
+					"400": {
 						"description": "",
 						"content": {
 							"application/json": {
@@ -2610,7 +3797,7 @@
 							}
 						}
 					},
-					"422": {
+					"404": {
 						"description": "",
 						"content": {
 							"application/json": {
@@ -2631,6 +3818,439 @@
 						}
 					}
 				},
+				"tags": [
+					"RoomV1"
+				],
+				"deprecated": true,
+				"security": [],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "appId",
+						"required": true,
+						"schema": {
+							"$ref": "#/components/schemas/AppId"
+						}
+					},
+					{
+						"in": "path",
+						"name": "roomId",
+						"required": true,
+						"schema": {
+							"$ref": "#/components/schemas/RoomId"
+						}
+					}
+				]
+			}
+		},
+		"/rooms/v2/{appId}/create": {
+			"post": {
+				"operationId": "CreateRoom",
+				"responses": {
+					"201": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ConnectionInfoV2"
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"RoomV2"
+				],
+				"security": [
+					{
+						"auth0": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "appId",
+						"required": true,
+						"schema": {
+							"$ref": "#/components/schemas/AppId"
+						}
+					},
+					{
+						"in": "query",
+						"name": "roomId",
+						"required": false,
+						"schema": {
+							"$ref": "#/components/schemas/RoomId"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/CreateRoomRequest"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/rooms/v2/{appId}/info/{roomId}": {
+			"get": {
+				"operationId": "GetRoomInfo",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Room"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"RoomV2"
+				],
+				"security": [
+					{
+						"auth0": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "appId",
+						"required": true,
+						"schema": {
+							"$ref": "#/components/schemas/AppId"
+						}
+					},
+					{
+						"in": "path",
+						"name": "roomId",
+						"required": true,
+						"schema": {
+							"$ref": "#/components/schemas/RoomId"
+						}
+					}
+				]
+			}
+		},
+		"/rooms/v2/{appId}/list/{processId}/active": {
+			"get": {
+				"operationId": "GetActiveRoomsForProcess",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"items": {
+										"$ref": "#/components/schemas/RoomWithoutAllocations"
+									},
+									"type": "array"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"RoomV2"
+				],
+				"security": [
+					{
+						"auth0": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "appId",
+						"required": true,
+						"schema": {
+							"$ref": "#/components/schemas/AppId"
+						}
+					},
+					{
+						"in": "path",
+						"name": "processId",
+						"required": true,
+						"schema": {
+							"$ref": "#/components/schemas/ProcessId"
+						}
+					}
+				]
+			}
+		},
+		"/rooms/v2/{appId}/list/{processId}/inactive": {
+			"get": {
+				"operationId": "GetInactiveRoomsForProcess",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"items": {
+										"$ref": "#/components/schemas/RoomWithoutAllocations"
+									},
+									"type": "array"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"RoomV2"
+				],
+				"security": [
+					{
+						"auth0": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "appId",
+						"required": true,
+						"schema": {
+							"$ref": "#/components/schemas/AppId"
+						}
+					},
+					{
+						"in": "path",
+						"name": "processId",
+						"required": true,
+						"schema": {
+							"$ref": "#/components/schemas/ProcessId"
+						}
+					}
+				]
+			}
+		},
+		"/rooms/v2/{appId}/destroy/{roomId}": {
+			"post": {
+				"operationId": "DestroyRoom",
+				"responses": {
+					"204": {
+						"description": "No content"
+					},
+					"404": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"RoomV2"
+				],
+				"security": [
+					{
+						"auth0": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "appId",
+						"required": true,
+						"schema": {
+							"$ref": "#/components/schemas/AppId"
+						}
+					},
+					{
+						"in": "path",
+						"name": "roomId",
+						"required": true,
+						"schema": {
+							"$ref": "#/components/schemas/RoomId"
+						}
+					}
+				]
+			}
+		},
+		"/rooms/v2/{appId}/suspend/{roomId}": {
+			"post": {
+				"operationId": "SuspendRoom",
+				"responses": {
+					"204": {
+						"description": "No content"
+					},
+					"404": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"RoomV2"
+				],
+				"security": [
+					{
+						"auth0": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "appId",
+						"required": true,
+						"schema": {
+							"$ref": "#/components/schemas/AppId"
+						}
+					},
+					{
+						"in": "path",
+						"name": "roomId",
+						"required": true,
+						"schema": {
+							"$ref": "#/components/schemas/RoomId"
+						}
+					}
+				]
+			}
+		},
+		"/rooms/v2/{appId}/connectioninfo/{roomId}": {
+			"get": {
+				"operationId": "GetConnectionInfo",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ConnectionInfoV2"
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"RoomV2"
+				],
 				"security": [],
 				"parameters": [
 					{
@@ -2654,6 +4274,9 @@
 		}
 	},
 	"servers": [
+		{
+			"url": "https://api.hathora.dev"
+		},
 		{
 			"url": "/"
 		}

@@ -10,18 +10,81 @@ globalThis.Response = Response as any;
 // form-data works for our use case so we don't care about the warning for now.
 SuppressWarnings([(warning) => warning.toString().includes("form-data")]);
 
-import * as ApiClient from "../../sdk-client";
 import { API_BASE } from "../config/api";
 import SuppressWarnings from "suppress-warnings";
+import {
+	AppV1Api,
+	BuildV1Api,
+	Configuration,
+	DeploymentV1Api,
+	LogV1Api,
+	ProcessesV1Api,
+	RoomV1Api,
+	RoomV2Api,
+} from "../../sdk-client";
 
-export function getApiClient(token: string) {
-	let client = new ApiClient.DefaultApi(
-		new ApiClient.Configuration({
+export function getBuildApiClient(token: string) {
+	return new BuildV1Api(
+		new Configuration({
 			headers: {
 				Authorization: `Bearer ${token}`,
 			},
 			basePath: API_BASE,
 		})
 	);
-	return client;
+}
+
+export function getAppApiClient(token: string) {
+	return new AppV1Api(
+		new Configuration({
+			headers: {
+				Authorization: `Bearer ${token}`,
+			},
+			basePath: API_BASE,
+		})
+	);
+}
+
+export function getDeploymentApiClient(token: string) {
+	return new DeploymentV1Api(
+		new Configuration({
+			headers: {
+				Authorization: `Bearer ${token}`,
+			},
+			basePath: API_BASE,
+		})
+	);
+}
+
+export function getLogApiClient(token: string) {
+	return new LogV1Api(
+		new Configuration({
+			headers: {
+				Authorization: `Bearer ${token}`,
+			},
+			basePath: API_BASE,
+		})
+	);
+}
+
+export function getProcessesApiClient(token: string) {
+	return new ProcessesV1Api(
+		new Configuration({
+			headers: {
+				Authorization: `Bearer ${token}`,
+			},
+			basePath: API_BASE,
+		})
+	);
+}
+
+export function getRoomApiClient(token: string) {
+	return new RoomV2Api(
+		new Configuration({
+			headers: {
+				Authorization: `Bearer ${token}`,
+			},
+			basePath: API_BASE,
+		})
+	);
 }

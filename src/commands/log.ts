@@ -1,6 +1,6 @@
 import { CommandModule } from "yargs";
 import { ERROR_MESSAGES } from "../util/errors";
-import { getApiClient } from "../util/getClient";
+import { getLogApiClient } from "../util/getClient";
 import { Region, ResponseError } from "../../sdk-client";
 
 export const logAllCommand: CommandModule<
@@ -58,7 +58,7 @@ export const logAllCommand: CommandModule<
 		token: { type: "string", demandOption: true, hidden: true },
 	},
 	handler: async (args) => {
-		const client = getApiClient(args.token);
+		const client = getLogApiClient(args.token);
 		try {
 			let fn:
 				| typeof client.getLogsForAppRaw

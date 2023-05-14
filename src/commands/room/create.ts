@@ -1,6 +1,6 @@
 import { CommandModule } from "yargs";
 import { ERROR_MESSAGES } from "../../util/errors";
-import { getApiClient } from "../../util/getClient";
+import { getRoomApiClient } from "../../util/getClient";
 import { Region, ResponseError } from "../../../sdk-client";
 
 export const roomCreateCommand: CommandModule<
@@ -24,7 +24,7 @@ export const roomCreateCommand: CommandModule<
 		token: { type: "string", demandOption: true, hidden: true },
 	},
 	handler: async (args) => {
-		const client = getApiClient(args.token);
+		const client = getRoomApiClient(args.token);
 		try {
 			const room = await client.createRoom({
 				appId: args.appId,
