@@ -7,10 +7,10 @@
 		"READEME.md"
 	],
 	"scripts": {
-		"build:dev": "npm generate:sdk-client && node ./scripts/build.js --dev",
-		"build:prod": "npm generate:sdk-client && node ./scripts/build.js",
+		"build:dev": "npm run generate:sdk-client && node ./scripts/build.js --dev",
+		"build:prod": "npm run generate:sdk-client && node ./scripts/build.js",
 		"generate:sdk-client": "openapi-generator-cli generate -i swagger.json -o sdk-client -g typescript-fetch",
-		"package": "npm build:prod && pkg dist/cli.js --targets node14-linux-x64,node14-macos-x64,node14-win-x64 --output dist/hathora-cloud",
+		"package": "npm run build:prod && pkg dist/cli.js --targets node14-linux-x64,node14-macos-x64,node14-win-x64 --output dist/hathora-cloud",
 		"typecheck": "tsc --noEmit"
 	},
 	"devDependencies": {

@@ -32,7 +32,7 @@ export const listAppsCommand: CommandModule<
 		try {
 			let response = await client.getApps();
 			if (args.raw) {
-				console.log(response);
+				console.log(JSON.stringify(response));
 			} else {
 				console.table(response, args.fields.split(","));
 			}
