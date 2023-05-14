@@ -29,7 +29,7 @@ export const roomConnectionInfoCommand: CommandModule<
 				appId: args.appId,
 				roomId: args.roomId,
 			});
-			console.log(connectionInfo);
+			console.log(JSON.stringify(connectionInfo));
 		} catch (e) {
 			if (e instanceof ResponseError) {
 				ERROR_MESSAGES.RESPONSE_ERROR(

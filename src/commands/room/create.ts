@@ -30,7 +30,7 @@ export const roomCreateCommand: CommandModule<
 				appId: args.appId,
 				createRoomRequest: { region: args.region },
 			});
-			console.log(room);
+			console.log(JSON.stringify(room));
 		} catch (e) {
 			if (e instanceof ResponseError) {
 				ERROR_MESSAGES.RESPONSE_ERROR(

@@ -28,7 +28,7 @@ export const appCreateCommand: CommandModule<
 					},
 				},
 			});
-			console.log(response);
+			console.log(JSON.stringify(response));
 		} catch (e) {
 			if (e instanceof ResponseError) {
 				ERROR_MESSAGES.RESPONSE_ERROR(

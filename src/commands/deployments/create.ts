@@ -105,6 +105,6 @@ export const createDeploymentCommand: CommandModule<
 	},
 	handler: async (args) => {
 		const deployment = await createDeployment(args);
-		console.log(deployment);
+		console.log(JSON.stringify(deployment));
 	}
 };
