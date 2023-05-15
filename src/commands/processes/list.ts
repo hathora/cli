@@ -60,7 +60,7 @@ export const listProcessesCommand: CommandModule<
 				region: args.region,
 			});
 			if (args.raw) {
-				console.log(response);
+				console.log(JSON.stringify(response));
 			} else {
 				console.table(response, args.fields.split(","));
 			}

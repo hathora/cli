@@ -40,7 +40,7 @@ export const listBuildsCommand: CommandModule<
 				appId: args.appId,
 			});
 			if (args.raw) {
-				console.log(response);
+				console.log(JSON.stringify(response));
 			} else {
 				console.table(response, args.fields.split(","));
 			}
