@@ -24,9 +24,13 @@ export const loginCommand: CommandModule = {
 			return;
 		}
 
-		const auth0 = await Issuer.discover("https://auth.hathora.com");
+		const auth0 = await Issuer.discover(
+			process.env.HATHORA_CLOUD_AUTH_DOMAIN ?? "https://auth.hathora.com"
+		);
 		const client = new auth0.Client({
-			client_id: "tWjDhuzPmuIWrI8R9s3yV3BQVw2tW0yq",
+			client_id:
+				process.env.HATHORA_CLOUD_AUTH_CLIENT_ID ??
+				"tWjDhuzPmuIWrI8R9s3yV3BQVw2tW0yq",
 			token_endpoint_auth_method: "none",
 			id_token_signed_response_alg: "RS256",
 			grant_type: "refresh_token",
