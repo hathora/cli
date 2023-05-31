@@ -33,9 +33,12 @@ export const roomCreateCommand: CommandModule<
 			console.log(JSON.stringify(room));
 		} catch (e) {
 			if (e instanceof ResponseError) {
+				const errorMessage = await e.response.text();
 				ERROR_MESSAGES.RESPONSE_ERROR(
 					e.response.status.toString(),
-					e.response.statusText
+					errorMessage.includes("Email not verified")
+						? "Email not verified"
+						: e.response.statusText
 				);
 			}
 			throw e;
