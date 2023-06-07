@@ -68,7 +68,8 @@ export const listProcessesCommand: CommandModule<
 			if (e instanceof ResponseError) {
 				ERROR_MESSAGES.RESPONSE_ERROR(
 					e.response.status.toString(),
-					e.response.statusText
+					e.response.statusText,
+					await e.response.text()
 				);
 			}
 			throw e;

@@ -6,12 +6,13 @@ import { createReadStream } from "fs";
 import { createTar } from "../../util/createTar";
 import { getBuildApiClient } from "../../util/getClient";
 
-
-export const createBuild = async (args: ArgumentsCamelCase<{
-	appId: string;
-	file: string;
-	token: string;
-}>): Promise<number> => {
+export const createBuild = async (
+	args: ArgumentsCamelCase<{
+		appId: string;
+		file: string;
+		token: string;
+	}>
+): Promise<number> => {
 	const client = getBuildApiClient(args.token);
 	try {
 		if (args.file && !(await stat(args.file)).isFile()) {
@@ -19,9 +20,7 @@ export const createBuild = async (args: ArgumentsCamelCase<{
 		}
 
 		const fileContents =
-			args.file === undefined
-				? await createTar()
-				: createReadStream(args.file);
+			args.file === undefined ? await createTar() : createReadStream(args.file);
 
 		const createResponse = await client.createBuild({
 			appId: args.appId,
@@ -39,12 +38,13 @@ export const createBuild = async (args: ArgumentsCamelCase<{
 		if (e instanceof ResponseError) {
 			ERROR_MESSAGES.RESPONSE_ERROR(
 				e.response.status.toString(),
-				e.response.statusText
+				e.response.statusText,
+				await e.response.text()
 			);
 		}
 		throw e;
 	}
-}
+};
 
 export const createBuildCommand: CommandModule<
 	{},
@@ -69,7 +69,7 @@ export const createBuildCommand: CommandModule<
 		token: { type: "string", demandOption: true, hidden: true },
 	},
 	handler: async (args) => {
-		const buildId = await createBuild(args)
+		const buildId = await createBuild(args);
 		console.log(`Build created with id ${buildId}`);
 	},
 };

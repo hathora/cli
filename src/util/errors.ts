@@ -30,7 +30,7 @@ export namespace ERROR_MESSAGES {
 		"Token file not found, please run `hathora login` to authenticate."
 	);
 	export const RESPONSE_ERROR = errorMessageHandlerFactory(
-		"Got Response Code %s: %s"
+		"Got Response Code %s: %s.\n%s"
 	);
 	export const FILE_NOT_FOUND =
 		errorMessageHandlerFactory("File not found: %s");
