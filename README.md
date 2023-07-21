@@ -24,6 +24,14 @@ yarn global add @hathora/cli
 hathora-cloud [command] <options>
 ```
 
+### CI Integration
+You can integrate `hathora-cloud` into your CI pipeline by passing your [developer token](https://hathora.dev/docs/guides/generate-developer-token) like so:
+```bash
+hathora-cloud deploy --appId $APP_ID --token $HATHORA_TOKEN
+```
+
+Here's an [example Github Action](https://github.com/hathora/bullet-mania/blob/develop/.github/workflows/deploy.yml#L14).
+
 ## Commands
 
 ```
