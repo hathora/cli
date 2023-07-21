@@ -15,7 +15,7 @@ export const appDeleteCommand: CommandModule<
 			demandOption: true,
 			describe: "Name of the app",
 		},
-		token: { type: "string", demandOption: true, hidden: true },
+		token: { type: "string", demandOption: true, hidden: false },
 	},
 	handler: async (args) => {
 		const client = getAppApiClient(args.token);

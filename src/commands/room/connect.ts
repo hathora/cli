@@ -20,7 +20,7 @@ export const roomConnectionInfoCommand: CommandModule<
 			demandOption: true,
 			describe: "Id of the room",
 		},
-		token: { type: "string", demandOption: true, hidden: true },
+		token: { type: "string", demandOption: true, hidden: false },
 	},
 	handler: async (args) => {
 		const client = getRoomApiClient(args.token);

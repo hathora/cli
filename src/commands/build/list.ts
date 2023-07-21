@@ -31,7 +31,7 @@ export const listBuildsCommand: CommandModule<
 			describe: "Show only the specified fields (comma separated)",
 			default: "buildId,createdAt,createdBy,status",
 		},
-		token: { type: "string", demandOption: true, hidden: true },
+		token: { type: "string", demandOption: true, hidden: false },
 	},
 	handler: async (args) => {
 		const client = getBuildApiClient(args.token);

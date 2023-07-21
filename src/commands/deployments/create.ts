@@ -109,7 +109,7 @@ export const createDeploymentCommand: CommandModule<
 			describe:
 				"JSON stringified version of env variables array (name and value)",
 		},
-		token: { type: "string", demandOption: true, hidden: true },
+		token: { type: "string", demandOption: true, hidden: false },
 	},
 	handler: async (args) => {
 		const deployment = await createDeployment(args);
