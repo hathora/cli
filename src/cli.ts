@@ -50,5 +50,6 @@ yargs(hideBin(process.argv))
 	.command(deploymentsCommand)
 	.command(buildCommand)
 	.command(roomCommand)
+	.wrap(yargs.terminalWidth())
 	.help()
 	.parse();
