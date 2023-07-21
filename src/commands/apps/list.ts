@@ -25,7 +25,7 @@ export const listAppsCommand: CommandModule<
 			describe: "Show only the specified fields (comma separated)",
 			default: "appName,appId,createdAt",
 		},
-		token: { type: "string", demandOption: true, hidden: true },
+		token: { type: "string", demandOption: true, hidden: false },
 	},
 	handler: async (args) => {
 		const client = getAppApiClient(args.token);
