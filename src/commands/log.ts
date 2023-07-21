@@ -55,7 +55,12 @@ export const logAllCommand: CommandModule<
 			demandOption: false,
 			describe: "Id of the deployment (exclusive with processId)",
 		},
-		token: { type: "string", demandOption: true, hidden: false },
+		token: {
+			type: "string",
+			demandOption: true,
+			describe: "Hathora developer token (required if no config file is present)",
+		},
+
 	},
 	handler: async (args) => {
 		const client = getLogApiClient(args.token);

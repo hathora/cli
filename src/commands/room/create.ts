@@ -21,7 +21,12 @@ export const roomCreateCommand: CommandModule<
 			describe: "Region to create the room in",
 			choices: Object.values(Region),
 		},
-		token: { type: "string", demandOption: true, hidden: false },
+		token: {
+			type: "string",
+			demandOption: true,
+			describe: "Hathora developer token (required if no config file is present)",
+		},
+
 	},
 	handler: async (args) => {
 		const client = getRoomApiClient(args.token);

@@ -31,7 +31,12 @@ export const listBuildsCommand: CommandModule<
 			describe: "Show only the specified fields (comma separated)",
 			default: "buildId,createdAt,createdBy,status",
 		},
-		token: { type: "string", demandOption: true, hidden: false },
+		token: {
+			type: "string",
+			demandOption: true,
+			describe: "Hathora developer token (required if no config file is present)",
+		},
+
 	},
 	handler: async (args) => {
 		const client = getBuildApiClient(args.token);

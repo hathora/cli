@@ -66,7 +66,12 @@ export const createBuildCommand: CommandModule<
 			type: "string",
 			describe: "path to the tgz archive to deploy",
 		},
-		token: { type: "string", demandOption: true, hidden: false },
+		token: {
+			type: "string",
+			demandOption: true,
+			describe: "Hathora developer token (required if no config file is present)",
+		},
+
 	},
 	handler: async (args) => {
 		const buildId = await createBuild(args);
