@@ -55,7 +55,7 @@ export const logAllCommand: CommandModule<
 			demandOption: false,
 			describe: "Id of the deployment (exclusive with processId)",
 		},
-		token: { type: "string", demandOption: true, hidden: false },
+		token: { type: "string", demandOption: true, hidden: true },
 	},
 	handler: async (args) => {
 		const client = getLogApiClient(args.token);

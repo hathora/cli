@@ -21,7 +21,7 @@ export const roomCreateCommand: CommandModule<
 			describe: "Region to create the room in",
 			choices: Object.values(Region),
 		},
-		token: { type: "string", demandOption: true, hidden: false },
+		token: { type: "string", demandOption: true, hidden: true },
 	},
 	handler: async (args) => {
 		const client = getRoomApiClient(args.token);

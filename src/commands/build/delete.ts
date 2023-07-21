@@ -20,7 +20,7 @@ export const buildDeleteCommand: CommandModule<
 			demandOption: true,
 			describe: "Build ID",
 		},
-		token: { type: "string", demandOption: true, hidden: false },
+		token: { type: "string", demandOption: true, hidden: true },
 	},
 	handler: async (args) => {
 		const client = getBuildApiClient(args.token);

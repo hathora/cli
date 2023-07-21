@@ -15,7 +15,7 @@ export const appCreateCommand: CommandModule<
 			demandOption: true,
 			describe: "Name of the app",
 		},
-		token: { type: "string", demandOption: true, hidden: false },
+		token: { type: "string", demandOption: true, hidden: true },
 	},
 	handler: async (args) => {
 		const client = getAppApiClient(args.token);

@@ -31,7 +31,7 @@ export const listDeploymentsCommand: CommandModule<
 			describe: "Show only the specified fields (comma separated)",
 			default: "deploymentId,createdAt,createdBy,buildId",
 		},
-		token: { type: "string", demandOption: true, hidden: false },
+		token: { type: "string", demandOption: true, hidden: true },
 	},
 	handler: async (args) => {
 		const client = getDeploymentApiClient(args.token);

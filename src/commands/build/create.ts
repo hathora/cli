@@ -66,7 +66,7 @@ export const createBuildCommand: CommandModule<
 			type: "string",
 			describe: "path to the tgz archive to deploy",
 		},
-		token: { type: "string", demandOption: true, hidden: false },
+		token: { type: "string", demandOption: true, hidden: true },
 	},
 	handler: async (args) => {
 		const buildId = await createBuild(args);
