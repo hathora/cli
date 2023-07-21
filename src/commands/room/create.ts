@@ -24,7 +24,7 @@ export const roomCreateCommand: CommandModule<
 		token: {
 			type: "string",
 			demandOption: true,
-			describe: "Hathora developer token (required if no config file is present)",
+			describe: "Hathora developer token (required if not present in the config file)",
 		},
 
 	},
