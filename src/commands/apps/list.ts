@@ -25,7 +25,12 @@ export const listAppsCommand: CommandModule<
 			describe: "Show only the specified fields (comma separated)",
 			default: "appName,appId,createdAt",
 		},
-		token: { type: "string", demandOption: true, hidden: true },
+		token: {
+			type: "string",
+			demandOption: true,
+			describe: "Hathora developer token (required only for CI environments)",
+		},
+
 	},
 	handler: async (args) => {
 		const client = getAppApiClient(args.token);
