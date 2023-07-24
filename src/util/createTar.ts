@@ -1,6 +1,7 @@
 import { findUp } from "./findUp";
 import tar from "tar";
-import { createReadStream, createWriteStream } from "fs";
+import ignore from "@balena/dockerignore";
+import { createReadStream, createWriteStream, readFileSync } from "fs";
 import { mkdtemp, unlink } from "fs/promises";
 import { join, sep } from "path";
 import { tmpdir } from "os";
@@ -10,6 +11,11 @@ export async function createTar() {
 	if (!rootDir) {
 		throw new Error("Could not find Dockerfile");
 	}
+
+	const ig = ignore().add(
+		readFileSync(join(rootDir, ".dockerignore")).toString()
+	);
+
 	const tmpDir = tmpdir();
 	const tempDir = await mkdtemp(`${tmpDir}${sep}`);
 	const fileLocation = join(tempDir, "bundle.tgz");
@@ -19,8 +25,7 @@ export async function createTar() {
 			{
 				cwd: rootDir,
 				gzip: true,
-				filter: (path) =>
-					!path.includes("node_modules") && !path.includes(".git"),
+				filter: (path) => !ig.ignores(path),
 			},
 			["."]
 		)
