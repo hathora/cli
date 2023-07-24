@@ -34,8 +34,11 @@ const tokenMiddleware: MiddlewareFunction = (argv) => {
 	argv.token = readFileSync(tokenFile).toString();
 };
 
-yargs(hideBin(process.argv))
-	.version(version)
+// Needed to get the correct terminal width
+// https://github.com/yargs/yargs/blob/main/docs/typescript.md
+const yargsInstance = yargs(hideBin(process.argv))
+
+yargsInstance.version(version)
 	.scriptName("hathora-cloud")
 	.middleware(tokenMiddleware, true)
 	.demandCommand(1, "Please specify a command")
@@ -50,5 +53,6 @@ yargs(hideBin(process.argv))
 	.command(deploymentsCommand)
 	.command(buildCommand)
 	.command(roomCommand)
+	.wrap(yargsInstance.terminalWidth())
 	.help()
 	.parse();

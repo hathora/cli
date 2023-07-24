@@ -20,7 +20,12 @@ export const roomConnectionInfoCommand: CommandModule<
 			demandOption: true,
 			describe: "Id of the room",
 		},
-		token: { type: "string", demandOption: true, hidden: true },
+		token: {
+			type: "string",
+			demandOption: true,
+			describe: "Hathora developer token (required only for CI environments)",
+		},
+
 	},
 	handler: async (args) => {
 		const client = getRoomApiClient(args.token);

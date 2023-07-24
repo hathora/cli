@@ -20,7 +20,12 @@ export const buildDeleteCommand: CommandModule<
 			demandOption: true,
 			describe: "Build ID",
 		},
-		token: { type: "string", demandOption: true, hidden: true },
+		token: {
+			type: "string",
+			demandOption: true,
+			describe: "Hathora developer token (required only for CI environments)",
+		},
+
 	},
 	handler: async (args) => {
 		const client = getBuildApiClient(args.token);

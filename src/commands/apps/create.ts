@@ -15,7 +15,12 @@ export const appCreateCommand: CommandModule<
 			demandOption: true,
 			describe: "Name of the app",
 		},
-		token: { type: "string", demandOption: true, hidden: true },
+		token: {
+			type: "string",
+			demandOption: true,
+			describe: "Hathora developer token (required only for CI environments)",
+		},
+
 	},
 	handler: async (args) => {
 		const client = getAppApiClient(args.token);

@@ -109,7 +109,12 @@ export const createDeploymentCommand: CommandModule<
 			describe:
 				"JSON stringified version of env variables array (name and value)",
 		},
-		token: { type: "string", demandOption: true, hidden: true },
+		token: {
+			type: "string",
+			demandOption: true,
+			describe: "Hathora developer token (required only for CI environments)",
+		},
+
 	},
 	handler: async (args) => {
 		const deployment = await createDeployment(args);

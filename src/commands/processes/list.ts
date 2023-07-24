@@ -46,7 +46,12 @@ export const listProcessesCommand: CommandModule<
 			describe: "Show only the specified fields (comma separated)",
 			default: "processId,deploymentId,region,activeConnections",
 		},
-		token: { type: "string", demandOption: true, hidden: true },
+		token: {
+			type: "string",
+			demandOption: true,
+			describe: "Hathora developer token (required only for CI environments)",
+		},
+
 	},
 	handler: async (args) => {
 		const client = getProcessesApiClient(args.token);

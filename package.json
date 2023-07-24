@@ -21,7 +21,7 @@
 		"@types/node-fetch": "2",
 		"@types/prompts": "^2.4.2",
 		"@types/tar": "^6.1.4",
-		"@types/yargs": "^17.0.22",
+		"@types/yargs": "^17.0.24",
 		"esbuild": "^0.17.6",
 		"esbuild-plugin-node-externals": "^1.0.1",
 		"pkg": "^5.8.0",
@@ -40,7 +40,7 @@
 		"prompts": "^2.4.2",
 		"suppress-warnings": "^1.0.2",
 		"tar": "^6.1.13",
-		"yargs": "^17.6.2"
+		"yargs": "^17.7.2"
 	},
 	"bin": {
 		"hathora-cloud": "dist/cli.js"
