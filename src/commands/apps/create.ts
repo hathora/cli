@@ -18,7 +18,7 @@ export const appCreateCommand: CommandModule<
 		token: {
 			type: "string",
 			demandOption: true,
-			describe: "Hathora developer token (required if not present in the config file)",
+			describe: "Hathora developer token (required only for CI environments)",
 		},
 
 	},
