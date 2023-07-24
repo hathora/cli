@@ -1,7 +1,12 @@
 import { findUp } from "./findUp";
 import tar from "tar";
 import ignore from "@balena/dockerignore";
-import { createReadStream, createWriteStream, readFileSync } from "fs";
+import {
+	createReadStream,
+	createWriteStream,
+	existsSync,
+	readFileSync,
+} from "fs";
 import { mkdtemp, unlink } from "fs/promises";
 import { join, sep } from "path";
 import { tmpdir } from "os";
@@ -12,9 +17,11 @@ export async function createTar() {
 		throw new Error("Could not find Dockerfile");
 	}
 
-	const ig = ignore().add(
-		readFileSync(join(rootDir, ".dockerignore")).toString()
-	);
+	const ig = ignore();
+	const dockerignoreFile = join(rootDir, ".dockerignore");
+	if (existsSync(dockerignoreFile)) {
+		ig.add(readFileSync(dockerignoreFile).toString());
+	}
 
 	const tmpDir = tmpdir();
 	const tempDir = await mkdtemp(`${tmpDir}${sep}`);
