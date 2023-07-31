@@ -11,6 +11,7 @@ export const createBuild = async (
 		appId: string;
 		file: string;
 		token: string;
+		buildTag?: string;
 	}>
 ): Promise<number> => {
 	const client = getBuildApiClient(args.token);
@@ -24,6 +25,7 @@ export const createBuild = async (
 
 		const createResponse = await client.createBuild({
 			appId: args.appId,
+			createBuildRequest: { buildTag: args.buildTag },
 		});
 		const buildResponse = await client.runBuildRaw({
 			appId: args.appId,
@@ -52,6 +54,7 @@ export const createBuildCommand: CommandModule<
 		appId: string;
 		file: string;
 		token: string;
+		buildTag: string;
 	}
 > = {
 	command: "create",
@@ -62,6 +65,11 @@ export const createBuildCommand: CommandModule<
 			demandOption: true,
 			describe: "Id of the app",
 		},
+		buildTag: {
+			type: "string",
+			demandOption: false,
+			describe: "The build tag for the build",
+		},
 		file: {
 			type: "string",
 			describe: "path to the tgz archive to deploy",
@@ -71,7 +79,6 @@ export const createBuildCommand: CommandModule<
 			demandOption: true,
 			describe: "Hathora developer token (required only for CI environments)",
 		},
-
 	},
 	handler: async (args) => {
 		const buildId = await createBuild(args);
