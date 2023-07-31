@@ -167,37 +167,29 @@
 				"minimum": 1,
 				"maxLength": 10000
 			},
-			"EnvironmentVariable": {
-				"properties": {
-					"isHidden": {
-						"type": "boolean",
-						"description": "Flag to indicate if the environment variable is hidden in the front-end.",
-						"example": false
-					},
-					"value": {
-						"type": "string",
-						"example": "TRUE",
-						"maxLength": 5000
-					},
-					"name": {
-						"type": "string",
-						"example": "EULA",
-						"minLength": 1,
-						"maxLength": 100,
-						"pattern": "^[a-zA-Z_][a-zA-Z0-9_]*$"
-					}
-				},
-				"required": [
-					"value",
-					"name"
-				],
-				"type": "object"
-			},
 			"Deployment": {
 				"properties": {
 					"env": {
 						"items": {
-							"$ref": "#/components/schemas/EnvironmentVariable"
+							"properties": {
+								"value": {
+									"type": "string",
+									"example": "TRUE",
+									"maxLength": 5000
+								},
+								"name": {
+									"type": "string",
+									"example": "EULA",
+									"minLength": 1,
+									"maxLength": 100,
+									"pattern": "^[a-zA-Z_][a-zA-Z0-9_]*$"
+								}
+							},
+							"required": [
+								"value",
+								"name"
+							],
+							"type": "object"
 						},
 						"type": "array",
 						"description": "The environment variable that our process will have access to at runtime.",
@@ -635,7 +627,25 @@
 				"properties": {
 					"env": {
 						"items": {
-							"$ref": "#/components/schemas/EnvironmentVariable"
+							"properties": {
+								"value": {
+									"type": "string",
+									"example": "TRUE",
+									"maxLength": 5000
+								},
+								"name": {
+									"type": "string",
+									"example": "EULA",
+									"minLength": 1,
+									"maxLength": 100,
+									"pattern": "^[a-zA-Z_][a-zA-Z0-9_]*$"
+								}
+							},
+							"required": [
+								"value",
+								"name"
+							],
+							"type": "object"
 						},
 						"type": "array",
 						"description": "The environment variable that our process will have access to at runtime.",
