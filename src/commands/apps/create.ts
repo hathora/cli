@@ -8,12 +8,12 @@ export const appCreateCommand: CommandModule<
 	{ appName: string; token: string }
 > = {
 	command: "create",
-	describe: "Create a new app",
+	describe: "Create a new application",
 	builder: {
 		appName: {
 			type: "string",
 			demandOption: true,
-			describe: "Name of the app",
+			describe: "Readable name for an application. Must be unique within an organization",
 		},
 		token: {
 			type: "string",

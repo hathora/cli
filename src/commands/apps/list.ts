@@ -12,7 +12,7 @@ export const listAppsCommand: CommandModule<
 	}
 > = {
 	command: "list",
-	describe: "list apps",
+	describe: "List of your organization’s applications",
 	builder: {
 		raw: {
 			type: "boolean",

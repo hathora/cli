@@ -24,29 +24,29 @@ export const deployCommand: CommandModule<
 		appId: {
 			type: "string",
 			demandOption: true,
-			describe: "Id of the app",
+			describe: "System generated unique identifier for an application",
 		},
 		file: {
 			type: "string",
-			describe: "path to the tgz archive to deploy",
+			describe: "Path to the tgz archive to deploy",
 		},
 		roomsPerProcess: {
 			type: "number",
-			describe: "number of rooms per process",
+			describe: "Governs how many rooms can be scheduled in a process",
 		},
 		planName: {
 			type: "string",
 			choices: ["tiny", "small", "medium", "large"],
-			describe: "plan name",
+			describe: "A plan defines how much CPU and memory is required to run an instance of your game server",
 		},
 		transportType: {
 			type: "string",
 			choices: ["tcp", "udp", "tls"],
-			describe: "transport type",
+			describe: "Specifies the underlying communication protocol to the exposed port",
 		},
 		containerPort: {
 			type: "number",
-			describe: "port the container listens to",
+			describe: "Port the container listens on",
 		},
 		env: {
 			type: "string",

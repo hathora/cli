@@ -13,12 +13,12 @@ export const listBuildsCommand: CommandModule<
 	}
 > = {
 	command: "list",
-	describe: "list builds for an app",
+	describe: "List of build objects for an application",
 	builder: {
 		appId: {
 			type: "string",
 			demandOption: true,
-			describe: "Id of the app",
+			describe: "System generated unique identifier for an application",
 		},
 		raw: {
 			type: "boolean",

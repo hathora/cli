@@ -15,23 +15,23 @@ export const listProcessesCommand: CommandModule<
 	}
 > = {
 	command: "list",
-	describe: "list processes for an app",
+	describe: "List of processes for an application",
 	builder: {
 		appId: {
 			type: "string",
 			demandOption: true,
-			describe: "Id of the app",
+			describe: "System generated unique identifier for an application",
 		},
 		region: {
 			type: "string",
 			demandOption: false,
 			choices: Object.values(Region),
-			describe: "process region",
+			describe: "Process region",
 		},
 		target: {
 			type: "string",
 			demandOption: false,
-			describe: "process type",
+			describe: "Process status",
 			choices: ["running", "stopped"],
 			default: "running",
 		},

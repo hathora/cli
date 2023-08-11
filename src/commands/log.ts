@@ -17,17 +17,17 @@ export const logAllCommand: CommandModule<
 	}
 > = {
 	command: "logs",
-	describe: "view logs for an app/deployment/process",
+	describe: "Returns a stream of logs for an application",
 	builder: {
 		appId: {
 			type: "string",
 			demandOption: true,
-			describe: "Id of the app",
+			describe: "System generated unique identifier for an application",
 		},
 		follow: {
 			type: "boolean",
 			demandOption: false,
-			describe: "follow logs",
+			describe: "Stream logs in realtime.",
 		},
 		timestamps: {
 			type: "boolean",
@@ -37,23 +37,23 @@ export const logAllCommand: CommandModule<
 		tailLines: {
 			type: "number",
 			demandOption: false,
-			describe: "number of lines to show",
+			describe: "Number of lines to return from most recent logs history",
 		},
 		region: {
 			type: "string",
 			demandOption: false,
 			choices: Object.values(Region),
-			describe: "region",
+			describe: "Region",
 		},
 		processId: {
 			type: "string",
 			demandOption: false,
-			describe: "Id of the process (exclusive with deploymentId)",
+			describe: "System generated unique identifier to a runtime instance of your game server",
 		},
 		deploymentId: {
 			type: "number",
 			demandOption: false,
-			describe: "Id of the deployment (exclusive with processId)",
+			describe: "System generated id for a deployment. Increments by 1",
 		},
 		token: {
 			type: "string",

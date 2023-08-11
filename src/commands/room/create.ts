@@ -13,7 +13,7 @@ export const roomCreateCommand: CommandModule<
 		appId: {
 			type: "string",
 			demandOption: true,
-			describe: "Id of the app",
+			describe: "System generated unique identifier for an application",
 		},
 		region: {
 			type: "string",

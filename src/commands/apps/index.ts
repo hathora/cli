@@ -5,7 +5,7 @@ import { listAppsCommand } from "./list";
 
 export const appsCommand: CommandModule<{}, any> = {
 	command: "apps [subcommand]",
-	describe: "Manage or create apps",
+	describe: "Operations that allow you manage your applications",
 	builder(yargs) {
 		return yargs
 			.command(appCreateCommand)

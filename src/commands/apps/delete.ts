@@ -8,12 +8,12 @@ export const appDeleteCommand: CommandModule<
 	{ appId: string; token: string }
 > = {
 	command: "delete",
-	describe: "Delete an app",
+	describe: "Delete an application. Your organization will lose access to this application",
 	builder: {
 		appId: {
 			type: "string",
 			demandOption: true,
-			describe: "Name of the app",
+			describe: "System generated unique identifier for an application",
 		},
 		token: {
 			type: "string",
