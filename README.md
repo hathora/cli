@@ -39,17 +39,16 @@ Usage: hathora-cloud <command> [options]
 
 Commands:
   hathora-cloud completion                generate completion script
-  hathora-cloud login                     Login to Hathora Cloud    [aliases: l]
-  hathora-cloud apps [subcommand]         Manage or create apps
-  hathora-cloud deploy                    create a deployment for an app
-  hathora-cloud logs                      view logs for an app/deployment/proces
-                                          s
-  hathora-cloud processes [subcommand]    Manage a specific process
-  hathora-cloud deployments [subcommand]  Manage or create deployments
-  hathora-cloud builds [subcommand]       Manage or create builds
-  hathora-cloud room [subcommand]         manage or create rooms
+  hathora-cloud login                     Login to Hathora Cloud                                                                                                                                [aliases: l]
+  hathora-cloud apps [subcommand]         Operations that allow you manage your applications
+  hathora-cloud deploy                    Create a new build image and deploy it
+  hathora-cloud logs                      Returns a stream of logs for an application
+  hathora-cloud processes [subcommand]    View all processes
+  hathora-cloud deployments [subcommand]  Create and view a build's deployment configurations at runtime
+  hathora-cloud builds [subcommand]       Operations that allow you manage your builds
+  hathora-cloud room [subcommand]         Operations to create, manage, and connect to rooms
 
 Options:
-  --version  Show version number                                       [boolean]
-  --help     Show help                                                 [boolean]
+  --version  Show version number                                                                                                                                                                   [boolean]
+  --help     Show help                                                                                                                                                                             [boolean]
 ```
