@@ -75,7 +75,7 @@ export const createDeploymentCommand: CommandModule<
 	}
 > = {
 	command: "create",
-	describe: "create a deployment",
+	describe: "Create a deployment",
 	builder: {
 		buildId: {
 			type: "number",

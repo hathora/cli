@@ -32,7 +32,7 @@ export const logAllCommand: CommandModule<
 		timestamps: {
 			type: "boolean",
 			demandOption: false,
-			describe: "show timestamps",
+			describe: "Show timestamps",
 		},
 		tailLines: {
 			type: "number",

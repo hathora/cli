@@ -3,7 +3,7 @@ import { listProcessesCommand } from "./list";
 
 export const processesCommand: CommandModule<{}, any> = {
 	command: "processes [subcommand]",
-	describe: "Operations to manage a process",
+	describe: "View all processes",
 	builder(yargs) {
 		return yargs
 			.command(listProcessesCommand)
