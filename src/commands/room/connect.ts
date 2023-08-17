@@ -8,17 +8,17 @@ export const roomConnectionInfoCommand: CommandModule<
 	{ appId: string; roomId: string; token: string }
 > = {
 	command: "connection-info",
-	describe: "get connection info for a room",
+	describe: "Get connection details to a room",
 	builder: {
 		appId: {
 			type: "string",
 			demandOption: true,
-			describe: "Id of the app",
+			describe: "System generated unique identifier for an application",
 		},
 		roomId: {
 			type: "string",
 			demandOption: true,
-			describe: "Id of the room",
+			describe: "Unique identifier to a game session or match",
 		},
 		token: {
 			type: "string",

@@ -13,12 +13,12 @@ export const listDeploymentsCommand: CommandModule<
 	}
 > = {
 	command: "list",
-	describe: "list deployments for an app",
+	describe: "List of deployments for an application",
 	builder: {
 		appId: {
 			type: "string",
 			demandOption: true,
-			describe: "Id of the app",
+			describe: "System generated unique identifier for an application",
 		},
 		raw: {
 			type: "boolean",

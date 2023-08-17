@@ -58,21 +58,21 @@ export const createBuildCommand: CommandModule<
 	}
 > = {
 	command: "create",
-	describe: "create a build",
+	describe: "Generate a new build for an existing application",
 	builder: {
 		appId: {
 			type: "string",
 			demandOption: true,
-			describe: "Id of the app",
+			describe: "System generated unique identifier for an application",
 		},
 		buildTag: {
 			type: "string",
 			demandOption: false,
-			describe: "The build tag for the build",
+			describe: "A tag to associate a version with a build",
 		},
 		file: {
 			type: "string",
-			describe: "path to the tgz archive to deploy",
+			describe: "Path to the tgz archive to deploy",
 		},
 		token: {
 			type: "string",

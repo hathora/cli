@@ -4,7 +4,7 @@ import { roomConnectionInfoCommand } from "./connect";
 
 export const roomCommand: CommandModule<{}, any> = {
 	command: "room [subcommand]",
-	describe: "manage or create rooms",
+	describe: "Operations to create, manage, and connect to rooms",
 	builder(yargs) {
 		return yargs
 			.command(roomCreateCommand)

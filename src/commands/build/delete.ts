@@ -8,17 +8,17 @@ export const buildDeleteCommand: CommandModule<
 	{ appId: string; buildId: number; token: string }
 > = {
 	command: "delete",
-	describe: "Delete an app",
+	describe: "Delete a build for an existing application",
 	builder: {
 		appId: {
 			type: "string",
 			demandOption: true,
-			describe: "Name of the app",
+			describe: "System generated unique identifier for an application",
 		},
 		buildId: {
 			type: "number",
 			demandOption: true,
-			describe: "Build ID",
+			describe: "System generated id for a build. Increments by 1",
 		},
 		token: {
 			type: "string",
