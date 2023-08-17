@@ -5,7 +5,7 @@ import { listBuildsCommand } from "./list";
 
 export const buildCommand: CommandModule<{}, any> = {
 	command: "builds [subcommand]",
-	describe: "Operations that allow you create and manage your build",
+	describe: "Operations that allow you manage your builds",
 	builder(yargs) {
 		return yargs
 			.command(createBuildCommand)

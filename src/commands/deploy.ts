@@ -19,7 +19,7 @@ export const deployCommand: CommandModule<
 	}
 > = {
 	command: "deploy",
-	describe: "Create and deploy a build it for an application",
+	describe: "Create a new build image and deploy it",
 	builder: {
 		appId: {
 			type: "string",
