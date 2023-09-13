@@ -9,7 +9,6 @@ export const logAllCommand: CommandModule<
 		appId: string;
 		processId: string;
 		follow: boolean | undefined;
-		timestamps: boolean | undefined;
 		tailLines: number | undefined;
 		token: string;
 	}
@@ -26,11 +25,6 @@ export const logAllCommand: CommandModule<
 			type: "boolean",
 			demandOption: false,
 			describe: "Stream logs in realtime.",
-		},
-		timestamps: {
-			type: "boolean",
-			demandOption: false,
-			describe: "Show timestamps",
 		},
 		tailLines: {
 			type: "number",
