@@ -52,13 +52,12 @@ export const logAllCommand: CommandModule<
 	handler: async (args) => {
 		const client = getLogApiClient(args.token);
 		try {
-			const request: any = {
+			const respone = await client.getLogsForProcessRaw({
 				appId: args.appId,
+				processId: args.processId,
 				follow: args.follow,
-				timestamps: args.timestamps,
 				tailLines: args.tailLines,
-			};
-			const respone = await client.getLogsForProcessRaw(request);
+			});
 			const body = respone.raw.body!;
 			body["pipe"](process.stdout);
 		} catch (e) {
