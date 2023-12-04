@@ -16,6 +16,7 @@ export const deployCommand: CommandModule<
 		containerPort?: number;
 		env?: string;
 		buildId?: number;
+		buildTag?: string;
 	}
 > = {
 	command: "deploy",
@@ -57,6 +58,10 @@ export const deployCommand: CommandModule<
 			type: "string",
 			demandOption: true,
 			describe: "Hathora developer token (required only for CI environments)",
+		},
+		buildTag: {
+			type: "string",
+			describe: "Tag to associate an external version with a build",
 		},
 	},
 	handler: async (args) => {
