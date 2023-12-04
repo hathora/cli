@@ -13,6 +13,7 @@ export const createDeployment = async (
 		transportType?: "tcp" | "udp" | "tls" | undefined;
 		containerPort?: number | undefined;
 		env?: string | undefined;
+		buildTag?: string | undefined;
 	}>
 ): Promise<Deployment> => {
 	const client = getDeploymentApiClient(args.token);
@@ -72,6 +73,7 @@ export const createDeploymentCommand: CommandModule<
 		transportType?: "tcp" | "udp" | "tls";
 		containerPort?: number;
 		env?: string;
+		buildTag?: string;
 	}
 > = {
 	command: "create",
@@ -113,6 +115,10 @@ export const createDeploymentCommand: CommandModule<
 			type: "string",
 			demandOption: true,
 			describe: "Hathora developer token (required only for CI environments)",
+		},
+		buildTag: {
+			type: "string",
+			describe: "Tag to associate an external version with a build",
 		},
 
 	},
