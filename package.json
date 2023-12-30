@@ -4,7 +4,7 @@
 	"license": "MIT",
 	"files": [
 		"dist",
-		"READEME.md"
+		"README.md"
 	],
 	"scripts": {
 		"build:dev": "npm run generate:sdk-client && node ./scripts/build.js --dev",
