@@ -43,6 +43,18 @@ const tokenMiddleware: MiddlewareFunction = async (argv) => {
 		grant_type: "refresh_token",
 	});
 	const token = readFileSync(tokenFile).toString();
+
+	// If the token is too short, it's not a JWT but a refresh token so we want to force a login
+	if (token.length < 100) {
+		console.log(
+			chalk.redBright(
+				`Your token has expired, run ${chalk.underline(
+					"hathora-cloud login"
+				)} first`
+			)
+		);
+		return;
+	}
 	const introspection = await client.introspect(token);
 	if (introspection.active === false) {
 		console.log(
