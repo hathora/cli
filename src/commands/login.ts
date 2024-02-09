@@ -53,8 +53,8 @@ export const loginCommand: CommandModule = {
 
 		open(handle.verification_uri_complete);
 		const tokens = await handle.poll();
-		if (tokens.refresh_token) {
-			outputFileSync(tokenPath, tokens.refresh_token);
+		if (tokens.access_token) {
+			outputFileSync(tokenPath, tokens.access_token);
 			console.log(
 				chalk.green(`Successfully logged in! Saved credentials to ${tokenPath}`)
 			);
