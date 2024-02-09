@@ -15,15 +15,6 @@ export const loginCommand: CommandModule = {
 	describe: "Login to Hathora Cloud",
 	handler: async () => {
 		const tokenPath = join(os.homedir(), ".config", "hathora", "token");
-		if (existsSync(tokenPath)) {
-			console.log(
-				chalk.red(
-					`A token file already present at ${tokenPath}. If you'd like to get a new one, please remove this file.`
-				)
-			);
-			return;
-		}
-
 		const auth0 = await Issuer.discover(
 			process.env.HATHORA_CLOUD_AUTH_DOMAIN ?? "https://auth.hathora.com"
 		);

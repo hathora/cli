@@ -13,7 +13,7 @@ import chalk from "chalk";
 import { join } from "path";
 import { existsSync, readFileSync } from "fs";
 import { homedir } from "os";
-import { Issuer } from "openid-client";
+import { jwtDecode } from "jwt-decode";
 
 const tokenMiddleware: MiddlewareFunction = async (argv) => {
 	if (argv._[0] === "login" || "token" in argv) {
@@ -22,52 +22,37 @@ const tokenMiddleware: MiddlewareFunction = async (argv) => {
 
 	const tokenFile = join(homedir(), ".config", "hathora", "token");
 	if (!existsSync(tokenFile)) {
-		console.log(
-			chalk.redBright(
-				`Missing token file, run ${chalk.underline(
-					"hathora-cloud login"
-				)} first`
-			)
-		);
+		printLoginPromptMessage("Missing token file");
 		return;
 	}
-	const auth0 = await Issuer.discover(
-		process.env.HATHORA_CLOUD_AUTH_DOMAIN ?? "https://auth.hathora.com"
-	);
-	const client = new auth0.Client({
-		client_id:
-			process.env.HATHORA_CLOUD_AUTH_CLIENT_ID ??
-			"tWjDhuzPmuIWrI8R9s3yV3BQVw2tW0yq",
-		token_endpoint_auth_method: "none",
-		id_token_signed_response_alg: "RS256",
-		grant_type: "refresh_token",
-	});
+
 	const token = readFileSync(tokenFile).toString();
 
 	// If the token is too short, it's not a JWT but a refresh token so we want to force a login
 	if (token.length < 100) {
-		console.log(
-			chalk.redBright(
-				`Your token has expired, run ${chalk.underline(
-					"hathora-cloud login"
-				)} first`
-			)
-		);
+		printLoginPromptMessage("Your token has expired");
 		return;
 	}
-	const introspection = await client.introspect(token);
-	if (introspection.active === false) {
-		console.log(
-			chalk.redBright(
-				`Your token has expired, run ${chalk.underline(
-					"hathora-cloud login"
-				)} first`
-			)
-		);
+	try {
+		const decodedToken = jwtDecode(token);
+		const expirationDate = new Date((decodedToken.exp ?? 0) * 1000);
+		if (expirationDate < new Date()) {
+			printLoginPromptMessage("Your token has expired");
+			return;
+		}
+	} catch (e) {
+		printLoginPromptMessage("Your token is invalid");
 		return;
 	}
+
+
 	argv.token = token;
 };
+
+function printLoginPromptMessage(reason: string) {
+	console.log(
+		chalk.redBright(`${reason}, run ${chalk.underline( "hathora-cloud login")} first`));
+}
 
 // Needed to get the correct terminal width
 // https://github.com/yargs/yargs/blob/main/docs/typescript.md
