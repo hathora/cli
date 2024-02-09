@@ -13,7 +13,6 @@ import chalk from "chalk";
 import { join } from "path";
 import { existsSync, readFileSync } from "fs";
 import { homedir } from "os";
-import { Issuer } from "openid-client";
 import { jwtDecode } from "jwt-decode";
 
 const tokenMiddleware: MiddlewareFunction = async (argv) => {
