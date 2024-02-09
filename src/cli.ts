@@ -46,17 +46,13 @@ const tokenMiddleware: MiddlewareFunction = async (argv) => {
 		return;
 	}
 
+
 	argv.token = token;
 };
 
 function printLoginPromptMessage(reason: string) {
 	console.log(
-		chalk.redBright(
-			`${reason}, run ${chalk.underline(
-				"hathora-cloud login"
-			)} first`
-		)
-	);
+		chalk.redBright(`${reason}, run ${chalk.underline( "hathora-cloud login")} first`));
 }
 
 // Needed to get the correct terminal width
