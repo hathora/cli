@@ -23,13 +23,7 @@ const tokenMiddleware: MiddlewareFunction = async (argv) => {
 
 	const tokenFile = join(homedir(), ".config", "hathora", "token");
 	if (!existsSync(tokenFile)) {
-		console.log(
-			chalk.redBright(
-				`Missing token file, run ${chalk.underline(
-					"hathora-cloud login"
-				)} first`
-			)
-		);
+		printLoginPromptMessage("Missing token file");
 		return;
 	}
 
