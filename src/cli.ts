@@ -28,6 +28,12 @@ const tokenMiddleware: MiddlewareFunction = async (argv) => {
 
 	const token = readFileSync(tokenFile).toString();
 
+	// We allow long lived hathora tokens to be used
+	if (token.startsWith("hathora_org_st_")) {
+		argv.token = token;
+		return;
+	}
+
 	// If the token is too short, it's not a JWT but a refresh token so we want to force a login
 	if (token.length < 100) {
 		printLoginPromptMessage("Your token has expired");
@@ -44,7 +50,6 @@ const tokenMiddleware: MiddlewareFunction = async (argv) => {
 		printLoginPromptMessage("Your token is invalid");
 		return;
 	}
-
 
 	argv.token = token;
 };
