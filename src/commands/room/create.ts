@@ -26,14 +26,13 @@ export const roomCreateCommand: CommandModule<
 			demandOption: true,
 			describe: "Hathora developer token (required only for CI environments)",
 		},
-
 	},
 	handler: async (args) => {
 		const client = getRoomApiClient(args.token);
 		try {
 			const room = await client.createRoom({
 				appId: args.appId,
-				createRoomRequest: { region: args.region },
+				createRoomParams: { region: args.region },
 			});
 			console.log(JSON.stringify(room));
 		} catch (e) {

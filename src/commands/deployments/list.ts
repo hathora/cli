@@ -36,12 +36,11 @@ export const listDeploymentsCommand: CommandModule<
 			demandOption: true,
 			describe: "Hathora developer token (required only for CI environments)",
 		},
-
 	},
 	handler: async (args) => {
 		const client = getDeploymentApiClient(args.token);
 		try {
-			let response = await client.getDeployments({
+			let response = await client.getDeploymentsDeprecated({
 				appId: args.appId,
 			});
 			if (args.raw) {
