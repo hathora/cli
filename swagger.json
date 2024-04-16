@@ -10,7 +10,7 @@
 				"type": "string",
 				"example": "minecraft",
 				"description": "Readable name for an application. Must be unique within an organization.",
-				"maxLength": 32,
+				"maxLength": 64,
 				"pattern": "^[a-z0-9-]+$"
 			},
 			"AppId": {
@@ -23,18 +23,45 @@
 				"type": "object",
 				"description": "Construct a type with a set of properties K of type T"
 			},
+			"AuthConfiguration": {
+				"properties": {
+					"google": {
+						"properties": {
+							"clientId": {
+								"type": "string",
+								"description": "A Google generated token representing the developer's credentials for [Google's API Console](https://console.cloud.google.com/apis/dashboard?pli=1&project=discourse-login-388921). Learn how to get a `clientId` [here](https://developers.google.com/identity/gsi/web/guides/get-google-api-clientid)."
+							}
+						},
+						"required": [
+							"clientId"
+						],
+						"type": "object",
+						"description": "Enable google auth for your application."
+					},
+					"nickname": {
+						"$ref": "#/components/schemas/Record_string.never_",
+						"description": "Enable nickname auth for your application."
+					},
+					"anonymous": {
+						"$ref": "#/components/schemas/Record_string.never_",
+						"description": "Enable anonymous auth for your application."
+					}
+				},
+				"type": "object",
+				"description": "Configure [player authentication](https://hathora.dev/docs/lobbies-and-matchmaking/auth-service) for your application. Use Hathora's built-in auth providers or use your own [custom authentication](https://hathora.dev/docs/lobbies-and-matchmaking/auth-service#custom-auth-provider)."
+			},
 			"OrgId": {
 				"type": "string",
-				"example": "google-oauth2|107030234048588177467",
-				"description": "System generated unique identifier for an organization."
+				"example": "org-6f706e83-0ec1-437a-9a46-7d4281eb2f39",
+				"description": "System generated unique identifier for an organization. Not guaranteed to have a specific format."
 			},
 			"Application": {
 				"properties": {
 					"deletedBy": {
 						"type": "string",
 						"nullable": true,
-						"description": "Email address for the user that deleted the application.",
-						"example": "dev@hathora.dev"
+						"description": "UserId or email address for the user that deleted the application.",
+						"example": "google-oauth2|107030234048588177467"
 					},
 					"deletedAt": {
 						"type": "string",
@@ -49,33 +76,14 @@
 					},
 					"createdBy": {
 						"type": "string",
-						"description": "Email address for the user that deleted the application.",
-						"example": "dev@hathora.dev"
+						"description": "UserId or email address for the user that created the application.",
+						"example": "google-oauth2|107030234048588177467"
 					},
 					"orgId": {
 						"$ref": "#/components/schemas/OrgId"
 					},
 					"authConfiguration": {
-						"properties": {
-							"google": {
-								"properties": {
-									"clientId": {
-										"type": "string"
-									}
-								},
-								"required": [
-									"clientId"
-								],
-								"type": "object"
-							},
-							"nickname": {
-								"$ref": "#/components/schemas/Record_string.never_"
-							},
-							"anonymous": {
-								"$ref": "#/components/schemas/Record_string.never_"
-							}
-						},
-						"type": "object",
+						"$ref": "#/components/schemas/AuthConfiguration",
 						"description": "Used to authenticate player requests. Use your own authentication or Hathora's Auth Client."
 					},
 					"appSecret": {
@@ -103,6 +111,12 @@
 				],
 				"type": "object",
 				"description": "An application object is the top level namespace for the game server."
+			},
+			"BuildId": {
+				"type": "integer",
+				"format": "int32",
+				"example": 1,
+				"description": "System generated id for a build. Increments by 1."
 			},
 			"DeploymentId": {
 				"type": "integer",
@@ -148,27 +162,20 @@
 				"type": "object",
 				"description": "A container port object represents the transport configruations for how your server will listen."
 			},
-			"PlanName": {
-				"type": "string",
-				"enum": [
-					"tiny",
-					"small",
-					"medium",
-					"large"
-				],
-				"example": "tiny",
-				"description": "A plan defines how much CPU and memory is required to run an instance of your game server.\n\n`tiny`: shared core, 1gb memory\n\n`small`: 1 core, 2gb memory\n\n`medium`: 2 core, 4gb memory\n\n`large`: 4 core, 8gb memory"
-			},
 			"NumRoomsPerProcess": {
 				"type": "integer",
 				"format": "int32",
 				"example": 3,
 				"description": "Governs how many [rooms](https://hathora.dev/docs/concepts/hathora-entities#room) can be scheduled in a process.",
 				"minimum": 1,
-				"maxLength": 10000
+				"maximum": 10000
 			},
-			"Deployment": {
+			"DeploymentV2": {
 				"properties": {
+					"idleTimeoutEnabled": {
+						"type": "boolean",
+						"description": "Option to shut down processes that have had no new connections or rooms\nfor five minutes."
+					},
 					"env": {
 						"items": {
 							"properties": {
@@ -198,9 +205,6 @@
 					"roomsPerProcess": {
 						"$ref": "#/components/schemas/NumRoomsPerProcess"
 					},
-					"planName": {
-						"$ref": "#/components/schemas/PlanName"
-					},
 					"additionalContainerPorts": {
 						"items": {
 							"$ref": "#/components/schemas/ContainerPort"
@@ -218,20 +222,6 @@
 						"$ref": "#/components/schemas/ContainerPort",
 						"description": "Describes the primary port your process listens on."
 					},
-					"transportType": {
-						"type": "string",
-						"enum": [
-							"tcp",
-							"udp",
-							"tls"
-						],
-						"deprecated": true
-					},
-					"containerPort": {
-						"type": "number",
-						"format": "double",
-						"deprecated": true
-					},
 					"createdAt": {
 						"type": "string",
 						"format": "date-time",
@@ -239,8 +229,8 @@
 					},
 					"createdBy": {
 						"type": "string",
-						"description": "Email address for the user that created the deployment.",
-						"example": "dev@hathora.dev"
+						"description": "UserId or email address for the user that created the deployment.",
+						"example": "google-oauth2|107030234048588177467"
 					},
 					"requestedMemoryMB": {
 						"type": "number",
@@ -258,23 +248,18 @@
 						"$ref": "#/components/schemas/DeploymentId"
 					},
 					"buildId": {
-						"type": "integer",
-						"format": "int32",
-						"description": "System generated id for a build associated with this deployment. Increments by 1.",
-						"example": 1
+						"$ref": "#/components/schemas/BuildId"
 					},
 					"appId": {
 						"$ref": "#/components/schemas/AppId"
 					}
 				},
 				"required": [
+					"idleTimeoutEnabled",
 					"env",
 					"roomsPerProcess",
-					"planName",
 					"additionalContainerPorts",
 					"defaultContainerPort",
-					"transportType",
-					"containerPort",
 					"createdAt",
 					"createdBy",
 					"requestedMemoryMB",
@@ -283,10 +268,128 @@
 					"buildId",
 					"appId"
 				],
-				"type": "object",
-				"description": "Deployment is a versioned configuration for a build that describes runtime behavior."
+				"type": "object"
 			},
-			"ApplicationWithDeployment": {
+			"BuildStatus": {
+				"type": "string",
+				"enum": [
+					"created",
+					"running",
+					"succeeded",
+					"failed"
+				]
+			},
+			"Region": {
+				"type": "string",
+				"enum": [
+					"Seattle",
+					"Los_Angeles",
+					"Washington_DC",
+					"Chicago",
+					"London",
+					"Frankfurt",
+					"Mumbai",
+					"Singapore",
+					"Tokyo",
+					"Sydney",
+					"Sao_Paulo"
+				]
+			},
+			"BuildTag": {
+				"type": "string",
+				"example": "0.1.14-14c793",
+				"description": "Tag to associate an external version with a build. It is accessible via [`GetBuildInfo()`](https://hathora.dev/api#tag/BuildV1/operation/GetBuildInfo).",
+				"maxLength": 1000
+			},
+			"Build": {
+				"properties": {
+					"buildTag": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/BuildTag"
+							}
+						],
+						"nullable": true
+					},
+					"regionalContainerTags": {
+						"items": {
+							"properties": {
+								"containerTag": {
+									"type": "string"
+								},
+								"region": {
+									"$ref": "#/components/schemas/Region"
+								}
+							},
+							"required": [
+								"containerTag",
+								"region"
+							],
+							"type": "object"
+						},
+						"type": "array",
+						"deprecated": true
+					},
+					"imageSize": {
+						"type": "integer",
+						"format": "int64",
+						"description": "The size (in bytes) of the Docker image built by Hathora."
+					},
+					"status": {
+						"$ref": "#/components/schemas/BuildStatus",
+						"description": "Current status of your build.\n\n`created`: a build was created but not yet run\n\n`running`: the build process is actively executing\n\n`succeeded`: the game server artifact was successfully built and stored in the Hathora registries\n\n`failed`: the build process was unsuccessful, most likely due to an error with the `Dockerfile`"
+					},
+					"deletedAt": {
+						"type": "string",
+						"format": "date-time",
+						"nullable": true,
+						"description": "When the build was deleted."
+					},
+					"finishedAt": {
+						"type": "string",
+						"format": "date-time",
+						"nullable": true,
+						"description": "When [`RunBuild()`](https://hathora.dev/api#tag/BuildV1/operation/RunBuild) finished executing."
+					},
+					"startedAt": {
+						"type": "string",
+						"format": "date-time",
+						"nullable": true,
+						"description": "When [`RunBuild()`](https://hathora.dev/api#tag/BuildV1/operation/RunBuild) is called."
+					},
+					"createdAt": {
+						"type": "string",
+						"format": "date-time",
+						"description": "When [`CreateBuild()`](https://hathora.dev/api#tag/BuildV1/operation/CreateBuild) is called."
+					},
+					"createdBy": {
+						"type": "string",
+						"description": "UserId or email address for the user that created the build.",
+						"example": "google-oauth2|107030234048588177467"
+					},
+					"buildId": {
+						"$ref": "#/components/schemas/BuildId"
+					},
+					"appId": {
+						"$ref": "#/components/schemas/AppId"
+					}
+				},
+				"required": [
+					"regionalContainerTags",
+					"imageSize",
+					"status",
+					"deletedAt",
+					"finishedAt",
+					"startedAt",
+					"createdAt",
+					"createdBy",
+					"buildId",
+					"appId"
+				],
+				"type": "object",
+				"description": "A build represents a game server artifact and its associated metadata."
+			},
+			"ApplicationWithLatestDeploymentAndBuild": {
 				"allOf": [
 					{
 						"$ref": "#/components/schemas/Application"
@@ -294,12 +397,24 @@
 					{
 						"properties": {
 							"deployment": {
-								"$ref": "#/components/schemas/Deployment"
+								"allOf": [
+									{
+										"$ref": "#/components/schemas/DeploymentV2"
+									},
+									{
+										"properties": {
+											"build": {
+												"$ref": "#/components/schemas/Build"
+											}
+										},
+										"required": [
+											"build"
+										],
+										"type": "object"
+									}
+								]
 							}
 						},
-						"required": [
-							"deployment"
-						],
 						"type": "object"
 					}
 				]
@@ -307,26 +422,7 @@
 			"AppConfig": {
 				"properties": {
 					"authConfiguration": {
-						"properties": {
-							"google": {
-								"properties": {
-									"clientId": {
-										"type": "string"
-									}
-								},
-								"required": [
-									"clientId"
-								],
-								"type": "object"
-							},
-							"nickname": {
-								"$ref": "#/components/schemas/Record_string.never_"
-							},
-							"anonymous": {
-								"$ref": "#/components/schemas/Record_string.never_"
-							}
-						},
-						"type": "object"
+						"$ref": "#/components/schemas/AuthConfiguration"
 					},
 					"appName": {
 						"$ref": "#/components/schemas/AppName"
@@ -338,10 +434,23 @@
 				],
 				"type": "object"
 			},
+			"ApiError": {
+				"properties": {
+					"message": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"message"
+				],
+				"type": "object"
+			},
 			"LoginResponse": {
 				"properties": {
 					"token": {
-						"type": "string"
+						"type": "string",
+						"description": "A unique Hathora-signed JWT player token.",
+						"example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0eXBlIjoiYW5vbnltb3VzIiwiaWQiOiJ3aDA4eWN3eTJwOSIsIm5hbWUiOiJqaXR0ZXJ5LXNhbG1vbi1ndWxsIiwiaWF0IjoxNjg5MzQ5MTk3fQ.-LzlPhZw2tw0ycZ229IRHwwmINGKWNPFMDrXOphLjEk"
 					}
 				},
 				"required": [
@@ -352,7 +461,9 @@
 			"LoginNicknameRequest": {
 				"properties": {
 					"nickname": {
-						"type": "string"
+						"type": "string",
+						"description": "An alias to represent a player.",
+						"example": "squiddytwoshoes"
 					}
 				},
 				"required": [
@@ -363,7 +474,9 @@
 			"LoginGoogleRequest": {
 				"properties": {
 					"idToken": {
-						"type": "string"
+						"type": "string",
+						"description": "A Google-signed OIDC ID token representing a player's authenticated identity. Learn how to get an `idToken` [here](https://cloud.google.com/docs/authentication/get-id-token).",
+						"example": "eyJhbGciOiJSUzI1NiIsImtpZCI6ImZkNDhhNzUxMzhkOWQ0OGYwYWE2MzVlZjU2OWM0ZTE5NmY3YWU4ZDYiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJhY2NvdW50cy5nb29nbGUuY29tIiwiYXpwIjoiODQ4NDEyODI2Nzg4LW00bXNyYjZxNDRkbTJ1ZTNrZ3Z1aTBmcTdrZGE1NWxzLmFwcHMuZ29vZ2xldXNlcmNvbnRlbnQuY29tIiwiYXVkIjoiODQ4NDEyODI2Nzg4LW00bXNyYjZxNDRkbTJ1ZTNrZ3Z1aTBmcTdrZGE1NWxzLmFwcHMuZ29vZ2xldXNlcmNvbnRlbnQuY29tIiwic3ViIjoiMTE0NTQyMzMwNzI3MTU2MTMzNzc2IiwiZW1haWwiOiJocGFdkeivmeuzQGdtYWlsLmNvbSIsImVtYWlsX3ZlcmlmaWVkIjp0cnVlLCJhdF9oYXNoIjoidno1NGhhdTNxbnVR"
 					}
 				},
 				"required": [
@@ -448,15 +561,18 @@
 				],
 				"type": "object"
 			},
+			"InvoiceStatus": {
+				"type": "string",
+				"enum": [
+					"pending",
+					"paid",
+					"overdue"
+				]
+			},
 			"Invoice": {
 				"properties": {
 					"status": {
-						"type": "string",
-						"enum": [
-							"pending",
-							"paid",
-							"overdue"
-						]
+						"$ref": "#/components/schemas/InvoiceStatus"
 					},
 					"amountDue": {
 						"type": "number",
@@ -490,107 +606,122 @@
 					"month",
 					"id"
 				],
-				"type": "object",
-				"description": "Billing types"
+				"type": "object"
 			},
-			"BuildId": {
-				"type": "integer",
-				"format": "int32",
-				"example": 1,
-				"description": "System generated id for a build. Increments by 1."
-			},
-			"Region": {
-				"type": "string",
-				"enum": [
-					"Seattle",
-					"Washington_DC",
-					"Chicago",
-					"London",
-					"Frankfurt",
-					"Mumbai",
-					"Singapore",
-					"Tokyo",
-					"Sydney",
-					"Sao_Paulo"
-				]
-			},
-			"BuildTag": {
-				"type": "string",
-				"example": "0.1.14-14c793",
-				"description": "Build tag to associate a version with a build. It is accessible via getBuildInfo().",
-				"maxLength": 1000
-			},
-			"Build": {
+			"CreateBuildParams": {
 				"properties": {
 					"buildTag": {
-						"allOf": [
-							{
-								"$ref": "#/components/schemas/BuildTag"
-							}
-						],
-						"nullable": true
+						"$ref": "#/components/schemas/BuildTag"
+					}
+				},
+				"type": "object"
+			},
+			"PlanName": {
+				"type": "string",
+				"enum": [
+					"tiny",
+					"small",
+					"medium",
+					"large"
+				],
+				"example": "tiny",
+				"description": "A plan defines how much CPU and memory is required to run an instance of your game server.\n\n`tiny`: shared core, 1gb memory\n\n`small`: 1 core, 2gb memory\n\n`medium`: 2 core, 4gb memory\n\n`large`: 4 core, 8gb memory"
+			},
+			"Deployment": {
+				"properties": {
+					"idleTimeoutEnabled": {
+						"type": "boolean",
+						"description": "Option to shut down processes that have had no new connections or rooms\nfor five minutes.",
+						"default": "true"
 					},
-					"regionalContainerTags": {
+					"env": {
 						"items": {
 							"properties": {
-								"containerTag": {
-									"type": "string"
+								"value": {
+									"type": "string",
+									"example": "TRUE",
+									"maxLength": 5000
 								},
-								"region": {
-									"$ref": "#/components/schemas/Region"
+								"name": {
+									"type": "string",
+									"example": "EULA",
+									"minLength": 1,
+									"maxLength": 100,
+									"pattern": "^[a-zA-Z_][a-zA-Z0-9_]*$"
 								}
 							},
 							"required": [
-								"containerTag",
-								"region"
+								"value",
+								"name"
 							],
 							"type": "object"
 						},
 						"type": "array",
-						"description": "An alias for the container image in our regional registries."
+						"description": "The environment variable that our process will have access to at runtime.",
+						"maxItems": 100
 					},
-					"imageSize": {
-						"type": "number",
-						"format": "double",
-						"description": "Image size in MB."
+					"roomsPerProcess": {
+						"$ref": "#/components/schemas/NumRoomsPerProcess"
 					},
-					"status": {
+					"planName": {
+						"$ref": "#/components/schemas/PlanName",
+						"deprecated": true
+					},
+					"additionalContainerPorts": {
+						"items": {
+							"$ref": "#/components/schemas/ContainerPort"
+						},
+						"type": "array",
+						"description": "Additional ports your server listens on.",
+						"example": {
+							"transportType": "tcp",
+							"port": 4000,
+							"name": "debug"
+						},
+						"maxItems": 2
+					},
+					"defaultContainerPort": {
+						"$ref": "#/components/schemas/ContainerPort",
+						"description": "Describes the primary port your process listens on."
+					},
+					"transportType": {
 						"type": "string",
 						"enum": [
-							"created",
-							"running",
-							"succeeded",
-							"failed"
+							"tcp",
+							"udp",
+							"tls"
 						],
-						"description": "Status of creating a build.\n\n`created`: a new `buildId` was generated\n\n`running`: the container image is being built\n\n`succeeded`: the container image was successfully built and stored in our registry\n\n`failed`: there was an issue creating and storing the container image in our container registry"
+						"deprecated": true
 					},
-					"deletedAt": {
-						"type": "string",
-						"format": "date-time",
-						"nullable": true,
-						"description": "When the container image was deleted."
-					},
-					"finishedAt": {
-						"type": "string",
-						"format": "date-time",
-						"nullable": true,
-						"description": "When the container image finished being built."
-					},
-					"startedAt": {
-						"type": "string",
-						"format": "date-time",
-						"nullable": true,
-						"description": "When the container image starts getting built."
+					"containerPort": {
+						"type": "number",
+						"format": "double",
+						"deprecated": true
 					},
 					"createdAt": {
 						"type": "string",
 						"format": "date-time",
-						"description": "When a new `buildId` is generated."
+						"description": "When the deployment was created."
 					},
 					"createdBy": {
 						"type": "string",
-						"description": "Email address for the user that created the build.",
-						"example": "dev@hathora.dev"
+						"description": "UserId or email address for the user that created the deployment.",
+						"example": "google-oauth2|107030234048588177467"
+					},
+					"requestedMemoryMB": {
+						"type": "integer",
+						"format": "int32",
+						"description": "The amount of memory allocated to your process.",
+						"example": 1024
+					},
+					"requestedCPU": {
+						"type": "number",
+						"format": "double",
+						"description": "The number of cores allocated to your process.",
+						"example": 0.5
+					},
+					"deploymentId": {
+						"$ref": "#/components/schemas/DeploymentId"
 					},
 					"buildId": {
 						"$ref": "#/components/schemas/BuildId"
@@ -600,31 +731,31 @@
 					}
 				},
 				"required": [
-					"buildTag",
-					"regionalContainerTags",
-					"imageSize",
-					"status",
-					"deletedAt",
-					"finishedAt",
-					"startedAt",
+					"env",
+					"roomsPerProcess",
+					"planName",
+					"additionalContainerPorts",
+					"defaultContainerPort",
+					"transportType",
+					"containerPort",
 					"createdAt",
 					"createdBy",
+					"requestedMemoryMB",
+					"requestedCPU",
+					"deploymentId",
 					"buildId",
 					"appId"
 				],
 				"type": "object",
-				"description": "Build is a versioned artifact for a game server's container image and its data."
-			},
-			"CreateBuildRequest": {
-				"properties": {
-					"buildTag": {
-						"$ref": "#/components/schemas/BuildTag"
-					}
-				},
-				"type": "object"
+				"description": "Deployment is a versioned configuration for a build that describes runtime behavior."
 			},
 			"DeploymentConfig": {
 				"properties": {
+					"idleTimeoutEnabled": {
+						"type": "boolean",
+						"description": "Option to shut down processes that have had no new connections or rooms\nfor five minutes.",
+						"default": "true"
+					},
 					"env": {
 						"items": {
 							"properties": {
@@ -687,6 +818,84 @@
 				"type": "object",
 				"description": "User specified deployment configuration for your application at runtime."
 			},
+			"DeploymentConfigV2": {
+				"properties": {
+					"idleTimeoutEnabled": {
+						"type": "boolean",
+						"description": "Option to shut down processes that have had no new connections or rooms\nfor five minutes."
+					},
+					"env": {
+						"items": {
+							"properties": {
+								"value": {
+									"type": "string",
+									"example": "TRUE",
+									"maxLength": 5000
+								},
+								"name": {
+									"type": "string",
+									"example": "EULA",
+									"minLength": 1,
+									"maxLength": 100,
+									"pattern": "^[a-zA-Z_][a-zA-Z0-9_]*$"
+								}
+							},
+							"required": [
+								"value",
+								"name"
+							],
+							"type": "object"
+						},
+						"type": "array",
+						"description": "The environment variable that our process will have access to at runtime.",
+						"maxItems": 100
+					},
+					"roomsPerProcess": {
+						"$ref": "#/components/schemas/NumRoomsPerProcess"
+					},
+					"additionalContainerPorts": {
+						"items": {
+							"$ref": "#/components/schemas/ContainerPort"
+						},
+						"type": "array",
+						"description": "Additional ports your server listens on.",
+						"maxItems": 2
+					},
+					"transportType": {
+						"$ref": "#/components/schemas/TransportType"
+					},
+					"containerPort": {
+						"type": "integer",
+						"format": "int32",
+						"description": "Default port the server listens on.",
+						"example": 4000,
+						"minimum": 1,
+						"maximum": 65535
+					},
+					"requestedMemoryMB": {
+						"type": "number",
+						"format": "double",
+						"description": "The amount of memory allocated to your process.",
+						"example": 1024
+					},
+					"requestedCPU": {
+						"type": "number",
+						"format": "double",
+						"description": "The number of cores allocated to your process.",
+						"example": 0.5
+					}
+				},
+				"required": [
+					"idleTimeoutEnabled",
+					"env",
+					"roomsPerProcess",
+					"transportType",
+					"containerPort",
+					"requestedMemoryMB",
+					"requestedCPU"
+				],
+				"type": "object"
+			},
 			"DiscoveryResponse": {
 				"items": {
 					"properties": {
@@ -708,12 +917,19 @@
 					],
 					"type": "object"
 				},
-				"type": "array"
+				"type": "array",
+				"example": [
+					{
+						"region": "Seattle",
+						"host": "ping.hathora.dev",
+						"port": 2000
+					}
+				]
 			},
 			"RoomId": {
 				"type": "string",
 				"example": "2swovpy1fnunu",
-				"description": "Unique identifier to a game session or match. Use either a system generated ID or pass in your own.",
+				"description": "Unique identifier to a game session or match. Use the default system generated ID or overwrite it with your own.\nNote: error will be returned if `roomId` is not globally unique.",
 				"minLength": 1,
 				"maxLength": 100,
 				"pattern": "^[a-zA-Z0-9_-]*$"
@@ -733,11 +949,26 @@
 				"type": "object",
 				"description": "User input to initialize the game state. Object must be smaller than 64KB."
 			},
+			"ShortCode": {
+				"type": "string",
+				"example": "LFG4",
+				"description": "User-defined identifier for a lobby.",
+				"maxLength": 100
+			},
 			"Lobby": {
 				"properties": {
+					"shortCode": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/ShortCode"
+							}
+						],
+						"nullable": true
+					},
 					"state": {
 						"additionalProperties": false,
 						"type": "object",
+						"nullable": true,
 						"description": "JSON blob to store metadata for a room. Must be smaller than 1MB."
 					},
 					"initialConfig": {
@@ -750,12 +981,11 @@
 					},
 					"createdBy": {
 						"type": "string",
-						"description": "Email address for the user that created the lobby.",
-						"example": "dev@hathora.dev"
+						"description": "UserId or email address for the user that created the lobby.",
+						"example": "google-oauth2|107030234048588177467"
 					},
 					"local": {
 						"type": "boolean",
-						"example": "false",
 						"deprecated": true
 					},
 					"visibility": {
@@ -772,6 +1002,7 @@
 					}
 				},
 				"required": [
+					"shortCode",
 					"initialConfig",
 					"createdAt",
 					"createdBy",
@@ -784,7 +1015,7 @@
 				"type": "object",
 				"description": "A lobby object allows you to store and manage metadata for your rooms."
 			},
-			"CreateLobbyRequest": {
+			"CreateLobbyParams": {
 				"properties": {
 					"visibility": {
 						"$ref": "#/components/schemas/LobbyVisibility"
@@ -803,7 +1034,7 @@
 				],
 				"type": "object"
 			},
-			"SetLobbyStateRequest": {
+			"SetLobbyStateParams": {
 				"properties": {
 					"state": {
 						"additionalProperties": false,
@@ -816,6 +1047,81 @@
 				],
 				"type": "object"
 			},
+			"RoomConfig": {
+				"type": "string",
+				"example": "{\"name\":\"my-room\"}",
+				"description": "Optional configuration parameters for the room. Can be any string including stringified JSON. It is accessible from the room via [`GetRoomInfo()`](https://hathora.dev/api#tag/RoomV2/operation/GetRoomInfo).",
+				"maxLength": 10000
+			},
+			"LobbyV3": {
+				"properties": {
+					"shortCode": {
+						"$ref": "#/components/schemas/ShortCode",
+						"description": "User defined identifier for a lobby, defaults to `roomId`"
+					},
+					"createdAt": {
+						"type": "string",
+						"format": "date-time",
+						"description": "When the lobby was created."
+					},
+					"createdBy": {
+						"type": "string",
+						"description": "UserId or email address for the user that created the lobby.",
+						"example": "google-oauth2|107030234048588177467"
+					},
+					"roomConfig": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/RoomConfig"
+							}
+						],
+						"nullable": true
+					},
+					"visibility": {
+						"$ref": "#/components/schemas/LobbyVisibility"
+					},
+					"region": {
+						"$ref": "#/components/schemas/Region"
+					},
+					"roomId": {
+						"$ref": "#/components/schemas/RoomId",
+						"description": "Hathora generated identifier for a room, unique for a given application (including stopped rooms)"
+					},
+					"appId": {
+						"$ref": "#/components/schemas/AppId"
+					}
+				},
+				"required": [
+					"shortCode",
+					"createdAt",
+					"createdBy",
+					"roomConfig",
+					"visibility",
+					"region",
+					"roomId",
+					"appId"
+				],
+				"type": "object",
+				"description": "A lobby object allows you to store and manage metadata for your rooms."
+			},
+			"CreateLobbyV3Params": {
+				"properties": {
+					"visibility": {
+						"$ref": "#/components/schemas/LobbyVisibility"
+					},
+					"roomConfig": {
+						"$ref": "#/components/schemas/RoomConfig"
+					},
+					"region": {
+						"$ref": "#/components/schemas/Region"
+					}
+				},
+				"required": [
+					"visibility",
+					"region"
+				],
+				"type": "object"
+			},
 			"LogsFollow": {
 				"type": "boolean",
 				"default": "false",
@@ -825,6 +1131,7 @@
 				"type": "integer",
 				"format": "int32",
 				"default": "100",
+				"example": 100,
 				"description": "Number of lines to return from most recent logs history.",
 				"minimum": 1,
 				"maximum": 5000
@@ -902,6 +1209,12 @@
 							"$ref": "#/components/schemas/MetricValue"
 						},
 						"type": "array"
+					},
+					"active_connections": {
+						"items": {
+							"$ref": "#/components/schemas/MetricValue"
+						},
+						"type": "array"
 					}
 				},
 				"type": "object",
@@ -916,7 +1229,8 @@
 					"cpu",
 					"memory",
 					"rate_egress",
-					"total_egress"
+					"total_egress",
+					"active_connections"
 				],
 				"description": "Available metrics to query over time."
 			},
@@ -932,8 +1246,8 @@
 						"$ref": "#/components/schemas/TransportType"
 					},
 					"port": {
-						"type": "number",
-						"format": "double"
+						"type": "integer",
+						"format": "int32"
 					},
 					"host": {
 						"type": "string"
@@ -955,13 +1269,13 @@
 					"port": 34567,
 					"transportType": "tcp"
 				},
-				"description": "Connection information to an exposed port on an active process."
+				"description": "Connection details for an active process."
 			},
 			"Process": {
 				"properties": {
 					"egressedBytes": {
-						"type": "number",
-						"format": "double",
+						"type": "integer",
+						"format": "int32",
 						"description": "Measures network traffic leaving the process in bytes.",
 						"example": 435
 					},
@@ -973,23 +1287,35 @@
 					},
 					"activeConnectionsUpdatedAt": {
 						"type": "string",
-						"format": "date-time"
+						"format": "date-time",
+						"deprecated": true
 					},
 					"activeConnections": {
-						"type": "number",
-						"format": "double",
+						"type": "integer",
+						"format": "int32",
 						"description": "Tracks the number of active connections to a process.",
-						"example": 10
+						"example": 10,
+						"deprecated": true
+					},
+					"roomsAllocatedUpdatedAt": {
+						"type": "string",
+						"format": "date-time"
+					},
+					"roomsAllocated": {
+						"type": "integer",
+						"format": "int32",
+						"description": "Tracks the number of rooms that have been allocated to the process.",
+						"example": 1
 					},
 					"roomSlotsAvailableUpdatedAt": {
 						"type": "string",
-						"format": "date-time"
+						"format": "date-time",
+						"deprecated": true
 					},
 					"roomSlotsAvailable": {
 						"type": "number",
 						"format": "double",
-						"description": "Tracks the number of room slots available on the process.",
-						"example": 1
+						"deprecated": true
 					},
 					"draining": {
 						"type": "boolean",
@@ -1037,7 +1363,12 @@
 						"maxItems": 2
 					},
 					"exposedPort": {
-						"$ref": "#/components/schemas/ExposedPort"
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/ExposedPort"
+							}
+						],
+						"nullable": true
 					},
 					"port": {
 						"type": "number",
@@ -1066,6 +1397,8 @@
 					"idleSince",
 					"activeConnectionsUpdatedAt",
 					"activeConnections",
+					"roomsAllocatedUpdatedAt",
+					"roomsAllocated",
 					"roomSlotsAvailableUpdatedAt",
 					"roomSlotsAvailable",
 					"draining",
@@ -1075,6 +1408,7 @@
 					"startingAt",
 					"roomsPerProcess",
 					"additionalExposedPorts",
+					"exposedPort",
 					"port",
 					"host",
 					"region",
@@ -1126,7 +1460,7 @@
 					"roomAllocationId"
 				],
 				"type": "object",
-				"description": "Metadata on allocated instances of a room."
+				"description": "Metadata on an allocated instance of a room."
 			},
 			"Pick_Room.Exclude_keyofRoom.allocations__": {
 				"properties": {
@@ -1137,7 +1471,11 @@
 						"$ref": "#/components/schemas/RoomId"
 					},
 					"roomConfig": {
-						"type": "string",
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/RoomConfig"
+							}
+						],
 						"nullable": true
 					},
 					"status": {
@@ -1183,8 +1521,8 @@
 								"type": "array"
 							},
 							"totalRooms": {
-								"type": "number",
-								"format": "double"
+								"type": "integer",
+								"format": "int32"
 							}
 						},
 						"required": [
@@ -1195,12 +1533,112 @@
 					}
 				]
 			},
-			"CreateRoomRequest": {
+			"ProcessStatus": {
+				"type": "string",
+				"enum": [
+					"starting",
+					"running",
+					"draining",
+					"stopping",
+					"stopped",
+					"failed"
+				]
+			},
+			"ProcessV2": {
+				"properties": {
+					"status": {
+						"$ref": "#/components/schemas/ProcessStatus",
+						"description": "Process in drain will not accept any new rooms."
+					},
+					"roomsAllocated": {
+						"type": "integer",
+						"format": "int32",
+						"description": "Tracks the number of rooms that have been allocated to the process.",
+						"example": 1
+					},
+					"terminatedAt": {
+						"type": "string",
+						"format": "date-time",
+						"nullable": true,
+						"description": "When the process has been terminated."
+					},
+					"stoppingAt": {
+						"type": "string",
+						"format": "date-time",
+						"nullable": true,
+						"description": "When the process is issued to stop. We use this to determine when we should stop billing."
+					},
+					"startedAt": {
+						"type": "string",
+						"format": "date-time",
+						"nullable": true,
+						"description": "When the process bound to the specified port. We use this to determine when we should start billing."
+					},
+					"createdAt": {
+						"type": "string",
+						"format": "date-time",
+						"description": "When the process started being provisioned."
+					},
+					"roomsPerProcess": {
+						"$ref": "#/components/schemas/NumRoomsPerProcess"
+					},
+					"additionalExposedPorts": {
+						"items": {
+							"$ref": "#/components/schemas/ExposedPort"
+						},
+						"type": "array",
+						"example": [
+							{
+								"host": "1.proxy.hathora.dev",
+								"name": "debug",
+								"port": 72941,
+								"transportType": "tcp"
+							}
+						],
+						"maxItems": 2
+					},
+					"exposedPort": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/ExposedPort"
+							}
+						],
+						"nullable": true
+					},
+					"region": {
+						"$ref": "#/components/schemas/Region"
+					},
+					"processId": {
+						"$ref": "#/components/schemas/ProcessId"
+					},
+					"deploymentId": {
+						"$ref": "#/components/schemas/DeploymentId"
+					},
+					"appId": {
+						"$ref": "#/components/schemas/AppId"
+					}
+				},
+				"required": [
+					"status",
+					"roomsAllocated",
+					"terminatedAt",
+					"stoppingAt",
+					"startedAt",
+					"createdAt",
+					"roomsPerProcess",
+					"additionalExposedPorts",
+					"exposedPort",
+					"region",
+					"processId",
+					"deploymentId",
+					"appId"
+				],
+				"type": "object"
+			},
+			"CreateRoomParams": {
 				"properties": {
 					"roomConfig": {
-						"type": "string",
-						"description": "Optional configuration parameters for the room. Can be any string including stringified JSON. It is accessible from the room via getRoomInfo().",
-						"maxLength": 10000
+						"$ref": "#/components/schemas/RoomConfig"
 					},
 					"region": {
 						"$ref": "#/components/schemas/Region"
@@ -1231,7 +1669,11 @@
 						"type": "array"
 					},
 					"roomConfig": {
-						"type": "string",
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/RoomConfig"
+							}
+						],
 						"nullable": true
 					},
 					"roomId": {
@@ -1339,7 +1781,9 @@
 						"enum": [
 							"starting",
 							"active"
-						]
+						],
+						"description": "`exposedPort` will only be available when the `status` of a room is \"active\".",
+						"example": "active"
 					},
 					"roomId": {
 						"$ref": "#/components/schemas/RoomId"
@@ -1352,10 +1796,138 @@
 				],
 				"type": "object",
 				"description": "Connection information for the default and additional ports."
+			},
+			"CreateRoomResponse": {
+				"allOf": [
+					{
+						"$ref": "#/components/schemas/ConnectionInfoV2"
+					},
+					{
+						"properties": {
+							"processId": {
+								"$ref": "#/components/schemas/ProcessId"
+							}
+						},
+						"required": [
+							"processId"
+						],
+						"type": "object"
+					}
+				]
+			},
+			"UpdateRoomConfigParams": {
+				"properties": {
+					"roomConfig": {
+						"$ref": "#/components/schemas/RoomConfig"
+					}
+				},
+				"required": [
+					"roomConfig"
+				],
+				"type": "object"
+			},
+			"OrgTokenId": {
+				"type": "string",
+				"example": "org-token-af469a92-5b45-4565-b3c4-b79878de67d2",
+				"description": "System generated unique identifier for an organization token."
+			},
+			"OrgTokenName": {
+				"type": "string",
+				"example": "ci-token",
+				"description": "Readable name for a token. Must be unique within an organization.",
+				"maxLength": 64
+			},
+			"OrgTokenStatus": {
+				"type": "string",
+				"enum": [
+					"active",
+					"revoked"
+				]
+			},
+			"OrgToken": {
+				"properties": {
+					"createdAt": {
+						"type": "string",
+						"format": "date-time"
+					},
+					"createdBy": {
+						"type": "string"
+					},
+					"lastFourCharsOfKey": {
+						"type": "string"
+					},
+					"status": {
+						"$ref": "#/components/schemas/OrgTokenStatus"
+					},
+					"name": {
+						"$ref": "#/components/schemas/OrgTokenName"
+					},
+					"orgId": {
+						"type": "string"
+					},
+					"orgTokenId": {
+						"$ref": "#/components/schemas/OrgTokenId"
+					}
+				},
+				"required": [
+					"createdAt",
+					"createdBy",
+					"lastFourCharsOfKey",
+					"status",
+					"name",
+					"orgId",
+					"orgTokenId"
+				],
+				"type": "object"
+			},
+			"ListOrgTokens": {
+				"properties": {
+					"tokens": {
+						"items": {
+							"$ref": "#/components/schemas/OrgToken"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"tokens"
+				],
+				"type": "object"
+			},
+			"CreatedOrgToken": {
+				"properties": {
+					"plainTextToken": {
+						"type": "string"
+					},
+					"orgToken": {
+						"$ref": "#/components/schemas/OrgToken"
+					}
+				},
+				"required": [
+					"plainTextToken",
+					"orgToken"
+				],
+				"type": "object"
+			},
+			"CreateOrgToken": {
+				"properties": {
+					"name": {
+						"$ref": "#/components/schemas/OrgTokenName"
+					}
+				},
+				"required": [
+					"name"
+				],
+				"type": "object"
 			}
 		},
 		"securitySchemes": {
-			"auth0": {
+			"hathoraDevToken": {
+				"type": "http",
+				"scheme": "bearer",
+				"bearerFormat": "JWT"
+			},
+			"playerAuth": {
 				"type": "http",
 				"scheme": "bearer",
 				"bearerFormat": "JWT"
@@ -1380,7 +1952,7 @@
 							"application/json": {
 								"schema": {
 									"items": {
-										"$ref": "#/components/schemas/ApplicationWithDeployment"
+										"$ref": "#/components/schemas/ApplicationWithLatestDeploymentAndBuild"
 									},
 									"type": "array"
 								}
@@ -1394,7 +1966,7 @@
 				],
 				"security": [
 					{
-						"auth0": []
+						"hathoraDevToken": []
 					}
 				],
 				"parameters": []
@@ -1414,12 +1986,22 @@
 							}
 						}
 					},
+					"401": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					},
 					"422": {
 						"description": "",
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "string"
+									"$ref": "#/components/schemas/ApiError"
 								}
 							}
 						}
@@ -1429,7 +2011,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "string"
+									"$ref": "#/components/schemas/ApiError"
 								}
 							}
 						}
@@ -1441,7 +2023,7 @@
 				],
 				"security": [
 					{
-						"auth0": []
+						"hathoraDevToken": []
 					}
 				],
 				"parameters": [],
@@ -1471,12 +2053,32 @@
 							}
 						}
 					},
+					"401": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					},
 					"404": {
 						"description": "",
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "string"
+									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
 								}
 							}
 						}
@@ -1486,7 +2088,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "string"
+									"$ref": "#/components/schemas/ApiError"
 								}
 							}
 						}
@@ -1498,7 +2100,7 @@
 				],
 				"security": [
 					{
-						"auth0": []
+						"hathoraDevToken": []
 					}
 				],
 				"parameters": [
@@ -1537,12 +2139,22 @@
 							}
 						}
 					},
+					"401": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					},
 					"404": {
 						"description": "",
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "string"
+									"$ref": "#/components/schemas/ApiError"
 								}
 							}
 						}
@@ -1554,7 +2166,7 @@
 				],
 				"security": [
 					{
-						"auth0": []
+						"hathoraDevToken": []
 					}
 				],
 				"parameters": [
@@ -1576,12 +2188,22 @@
 					"204": {
 						"description": "No content"
 					},
+					"401": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					},
 					"404": {
 						"description": "",
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "string"
+									"$ref": "#/components/schemas/ApiError"
 								}
 							}
 						}
@@ -1591,7 +2213,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "string"
+									"$ref": "#/components/schemas/ApiError"
 								}
 							}
 						}
@@ -1603,7 +2225,7 @@
 				],
 				"security": [
 					{
-						"auth0": []
+						"hathoraDevToken": []
 					}
 				],
 				"parameters": [
@@ -1637,12 +2259,13 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "string"
+									"$ref": "#/components/schemas/ApiError"
 								}
 							}
 						}
 					}
 				},
+				"description": "Returns a unique player token for an anonymous user.",
 				"tags": [
 					"AuthV1"
 				],
@@ -1678,12 +2301,13 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "string"
+									"$ref": "#/components/schemas/ApiError"
 								}
 							}
 						}
 					}
 				},
+				"description": "Returns a unique player token with a specified nickname for a user.",
 				"tags": [
 					"AuthV1"
 				],
@@ -1729,7 +2353,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "string"
+									"$ref": "#/components/schemas/ApiError"
 								}
 							}
 						}
@@ -1739,12 +2363,13 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "string"
+									"$ref": "#/components/schemas/ApiError"
 								}
 							}
 						}
 					}
 				},
+				"description": "Returns a unique player token using a Google-signed OIDC `idToken`.",
 				"tags": [
 					"AuthV1"
 				],
@@ -1786,12 +2411,22 @@
 							}
 						}
 					},
+					"401": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					},
 					"404": {
 						"description": "",
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "string"
+									"$ref": "#/components/schemas/ApiError"
 								}
 							}
 						}
@@ -1802,7 +2437,7 @@
 				],
 				"security": [
 					{
-						"auth0": []
+						"hathoraDevToken": []
 					}
 				],
 				"parameters": []
@@ -1822,12 +2457,22 @@
 							}
 						}
 					},
+					"401": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					},
 					"404": {
 						"description": "",
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "string"
+									"$ref": "#/components/schemas/ApiError"
 								}
 							}
 						}
@@ -1837,7 +2482,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "string"
+									"$ref": "#/components/schemas/ApiError"
 								}
 							}
 						}
@@ -1848,7 +2493,7 @@
 				],
 				"security": [
 					{
-						"auth0": []
+						"hathoraDevToken": []
 					}
 				],
 				"parameters": []
@@ -1868,12 +2513,22 @@
 							}
 						}
 					},
+					"401": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					},
 					"404": {
 						"description": "",
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "string"
+									"$ref": "#/components/schemas/ApiError"
 								}
 							}
 						}
@@ -1884,7 +2539,7 @@
 				],
 				"security": [
 					{
-						"auth0": []
+						"hathoraDevToken": []
 					}
 				],
 				"parameters": [],
@@ -1917,12 +2572,22 @@
 							}
 						}
 					},
+					"401": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					},
 					"404": {
 						"description": "",
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "string"
+									"$ref": "#/components/schemas/ApiError"
 								}
 							}
 						}
@@ -1933,7 +2598,7 @@
 				],
 				"security": [
 					{
-						"auth0": []
+						"hathoraDevToken": []
 					}
 				],
 				"parameters": []
@@ -1956,24 +2621,34 @@
 							}
 						}
 					},
+					"401": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					},
 					"404": {
 						"description": "",
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "string"
+									"$ref": "#/components/schemas/ApiError"
 								}
 							}
 						}
 					}
 				},
-				"description": "Returns an array of [build](https://hathora.dev/docs/concepts/hathora-entities#build) objects for an existing [application](https://hathora.dev/docs/concepts/hathora-entities#application) using `appId`.",
+				"description": "Returns an array of [builds](https://hathora.dev/docs/concepts/hathora-entities#build) for an [application](https://hathora.dev/docs/concepts/hathora-entities#application).",
 				"tags": [
 					"BuildV1"
 				],
 				"security": [
 					{
-						"auth0": []
+						"hathoraDevToken": []
 					}
 				],
 				"parameters": [
@@ -2002,24 +2677,34 @@
 							}
 						}
 					},
+					"401": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					},
 					"404": {
 						"description": "",
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "string"
+									"$ref": "#/components/schemas/ApiError"
 								}
 							}
 						}
 					}
 				},
-				"description": "Get details for an existing [build](https://hathora.dev/docs/concepts/hathora-entities#build) using `appId` and `buildId`.",
+				"description": "Get details for a [build](https://hathora.dev/docs/concepts/hathora-entities#build).",
 				"tags": [
 					"BuildV1"
 				],
 				"security": [
 					{
-						"auth0": []
+						"hathoraDevToken": []
 					}
 				],
 				"parameters": [
@@ -2056,12 +2741,22 @@
 							}
 						}
 					},
+					"401": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					},
 					"404": {
 						"description": "",
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "string"
+									"$ref": "#/components/schemas/ApiError"
 								}
 							}
 						}
@@ -2071,19 +2766,19 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "string"
+									"$ref": "#/components/schemas/ApiError"
 								}
 							}
 						}
 					}
 				},
-				"description": "Generate a new [build](https://hathora.dev/docs/concepts/hathora-entities#build) for an existing [application](https://hathora.dev/docs/concepts/hathora-entities#application) using `appId`. You can optionally pass in a `buildTag` to tag your build with a version. You need `buildId` to run a [build](https://hathora.dev/docs/concepts/hathora-entities#build).",
+				"description": "Creates a new [build](https://hathora.dev/docs/concepts/hathora-entities#build). Responds with a `buildId` that you must pass to [`RunBuild()`](https://hathora.dev/api#tag/BuildV1/operation/RunBuild) to build the game server artifact. You can optionally pass in a `buildTag` to associate an external version with a build.",
 				"tags": [
 					"BuildV1"
 				],
 				"security": [
 					{
-						"auth0": []
+						"hathoraDevToken": []
 					}
 				],
 				"parameters": [
@@ -2101,7 +2796,7 @@
 					"content": {
 						"application/json": {
 							"schema": {
-								"$ref": "#/components/schemas/CreateBuildRequest"
+								"$ref": "#/components/schemas/CreateBuildParams"
 							}
 						}
 					}
@@ -2123,12 +2818,22 @@
 							}
 						}
 					},
+					"401": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					},
 					"404": {
 						"description": "",
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "string"
+									"$ref": "#/components/schemas/ApiError"
 								}
 							}
 						}
@@ -2138,19 +2843,19 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "string"
+									"$ref": "#/components/schemas/ApiError"
 								}
 							}
 						}
 					}
 				},
-				"description": "Provide a tarball that will generate a container image for an existing [application](https://hathora.dev/docs/concepts/hathora-entities#application) using `appId`. Pass in `buildId` generated from Create Build.",
+				"description": "Builds a game server artifact from a tarball you provide. Pass in the `buildId` generated from [`CreateBuild()`](https://hathora.dev/api#tag/BuildV1/operation/CreateBuild).",
 				"tags": [
 					"BuildV1"
 				],
 				"security": [
 					{
-						"auth0": []
+						"hathoraDevToken": []
 					}
 				],
 				"parameters": [
@@ -2199,12 +2904,22 @@
 					"204": {
 						"description": "No content"
 					},
+					"401": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					},
 					"404": {
 						"description": "",
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "string"
+									"$ref": "#/components/schemas/ApiError"
 								}
 							}
 						}
@@ -2214,7 +2929,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "string"
+									"$ref": "#/components/schemas/ApiError"
 								}
 							}
 						}
@@ -2224,19 +2939,19 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "string"
+									"$ref": "#/components/schemas/ApiError"
 								}
 							}
 						}
 					}
 				},
-				"description": "Delete a [build](https://hathora.dev/docs/concepts/hathora-entities#build) for an existing [application](https://hathora.dev/docs/concepts/hathora-entities#application) using `appId` and `buildId`.",
+				"description": "Delete a [build](https://hathora.dev/docs/concepts/hathora-entities#build). All associated metadata is deleted.",
 				"tags": [
 					"BuildV1"
 				],
 				"security": [
 					{
-						"auth0": []
+						"hathoraDevToken": []
 					}
 				],
 				"parameters": [
@@ -2261,7 +2976,7 @@
 		},
 		"/deployments/v1/{appId}/list": {
 			"get": {
-				"operationId": "GetDeployments",
+				"operationId": "GetDeploymentsDeprecated",
 				"responses": {
 					"200": {
 						"description": "Ok",
@@ -2276,24 +2991,92 @@
 							}
 						}
 					},
+					"401": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					},
 					"404": {
 						"description": "",
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "string"
+									"$ref": "#/components/schemas/ApiError"
 								}
 							}
 						}
 					}
 				},
-				"description": "Returns an array of [deployment](https://hathora.dev/docs/concepts/hathora-entities#deployment) objects for an existing [application](https://hathora.dev/docs/concepts/hathora-entities#application) using `appId`.",
+				"description": "Returns an array of [deployments](https://hathora.dev/docs/concepts/hathora-entities#deployment) for an [application](https://hathora.dev/docs/concepts/hathora-entities#application).",
 				"tags": [
 					"DeploymentV1"
 				],
+				"deprecated": true,
 				"security": [
 					{
-						"auth0": []
+						"hathoraDevToken": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "appId",
+						"required": true,
+						"schema": {
+							"$ref": "#/components/schemas/AppId"
+						}
+					}
+				]
+			}
+		},
+		"/deployments/v1/{appId}/latest": {
+			"get": {
+				"operationId": "GetLatestDeploymentDeprecated",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Deployment"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					}
+				},
+				"description": "Get the latest [deployment](https://hathora.dev/docs/concepts/hathora-entities#deployment) for an [application](https://hathora.dev/docs/concepts/hathora-entities#application).",
+				"tags": [
+					"DeploymentV1"
+				],
+				"deprecated": true,
+				"security": [
+					{
+						"hathoraDevToken": []
 					}
 				],
 				"parameters": [
@@ -2310,7 +3093,7 @@
 		},
 		"/deployments/v1/{appId}/info/{deploymentId}": {
 			"get": {
-				"operationId": "GetDeploymentInfo",
+				"operationId": "GetDeploymentInfoDeprecated",
 				"responses": {
 					"200": {
 						"description": "Ok",
@@ -2322,24 +3105,35 @@
 							}
 						}
 					},
+					"401": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					},
 					"404": {
 						"description": "",
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "string"
+									"$ref": "#/components/schemas/ApiError"
 								}
 							}
 						}
 					}
 				},
-				"description": "Get details for an existing [deployment](https://hathora.dev/docs/concepts/hathora-entities#deployment) using `appId`.",
+				"description": "Get details for a [deployment](https://hathora.dev/docs/concepts/hathora-entities#deployment).",
 				"tags": [
 					"DeploymentV1"
 				],
+				"deprecated": true,
 				"security": [
 					{
-						"auth0": []
+						"hathoraDevToken": []
 					}
 				],
 				"parameters": [
@@ -2364,7 +3158,7 @@
 		},
 		"/deployments/v1/{appId}/create/{buildId}": {
 			"post": {
-				"operationId": "CreateDeployment",
+				"operationId": "CreateDeploymentDeprecated",
 				"responses": {
 					"201": {
 						"description": "",
@@ -2381,7 +3175,17 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "string"
+									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
 								}
 							}
 						}
@@ -2391,7 +3195,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "string"
+									"$ref": "#/components/schemas/ApiError"
 								}
 							}
 						}
@@ -2401,19 +3205,20 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "string"
+									"$ref": "#/components/schemas/ApiError"
 								}
 							}
 						}
 					}
 				},
-				"description": "Create a new [deployment](https://hathora.dev/docs/concepts/hathora-entities#deployment) for an existing [application](https://hathora.dev/docs/concepts/hathora-entities#application) and [build](https://hathora.dev/docs/concepts/hathora-entities#build).",
+				"description": "Create a new [deployment](https://hathora.dev/docs/concepts/hathora-entities#deployment). Creating a new deployment means all new rooms created will use the latest deployment configuration, but existing games in progress will not be affected.",
 				"tags": [
 					"DeploymentV1"
 				],
+				"deprecated": true,
 				"security": [
 					{
-						"auth0": []
+						"hathoraDevToken": []
 					}
 				],
 				"parameters": [
@@ -2446,6 +3251,279 @@
 				}
 			}
 		},
+		"/deployments/v2/{appId}/list": {
+			"get": {
+				"operationId": "GetDeployments",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"items": {
+										"$ref": "#/components/schemas/DeploymentV2"
+									},
+									"type": "array"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					}
+				},
+				"description": "Returns an array of [deployments](https://hathora.dev/docs/concepts/hathora-entities#deployment) for an [application](https://hathora.dev/docs/concepts/hathora-entities#application).",
+				"tags": [
+					"DeploymentV2"
+				],
+				"security": [
+					{
+						"hathoraDevToken": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "appId",
+						"required": true,
+						"schema": {
+							"$ref": "#/components/schemas/AppId"
+						}
+					}
+				]
+			}
+		},
+		"/deployments/v2/{appId}/latest": {
+			"get": {
+				"operationId": "GetLatestDeployment",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/DeploymentV2"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					}
+				},
+				"description": "Get the latest [deployment](https://hathora.dev/docs/concepts/hathora-entities#deployment) for an [application](https://hathora.dev/docs/concepts/hathora-entities#application).",
+				"tags": [
+					"DeploymentV2"
+				],
+				"security": [
+					{
+						"hathoraDevToken": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "appId",
+						"required": true,
+						"schema": {
+							"$ref": "#/components/schemas/AppId"
+						}
+					}
+				]
+			}
+		},
+		"/deployments/v2/{appId}/info/{deploymentId}": {
+			"get": {
+				"operationId": "GetDeploymentInfo",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/DeploymentV2"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					}
+				},
+				"description": "Get details for a [deployment](https://hathora.dev/docs/concepts/hathora-entities#deployment).",
+				"tags": [
+					"DeploymentV2"
+				],
+				"security": [
+					{
+						"hathoraDevToken": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "appId",
+						"required": true,
+						"schema": {
+							"$ref": "#/components/schemas/AppId"
+						}
+					},
+					{
+						"in": "path",
+						"name": "deploymentId",
+						"required": true,
+						"schema": {
+							"$ref": "#/components/schemas/DeploymentId"
+						}
+					}
+				]
+			}
+		},
+		"/deployments/v2/{appId}/create/{buildId}": {
+			"post": {
+				"operationId": "CreateDeployment",
+				"responses": {
+					"201": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/DeploymentV2"
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					}
+				},
+				"description": "Create a new [deployment](https://hathora.dev/docs/concepts/hathora-entities#deployment). Creating a new deployment means all new rooms created will use the latest deployment configuration, but existing games in progress will not be affected.",
+				"tags": [
+					"DeploymentV2"
+				],
+				"security": [
+					{
+						"hathoraDevToken": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "appId",
+						"required": true,
+						"schema": {
+							"$ref": "#/components/schemas/AppId"
+						}
+					},
+					{
+						"in": "path",
+						"name": "buildId",
+						"required": true,
+						"schema": {
+							"$ref": "#/components/schemas/BuildId"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/DeploymentConfigV2"
+							}
+						}
+					}
+				}
+			}
+		},
 		"/discovery/v1/ping": {
 			"get": {
 				"operationId": "GetPingServiceEndpoints",
@@ -2461,7 +3539,7 @@
 						}
 					}
 				},
-				"description": "Returns an array of all regions with a host and port that a client can directly ping.",
+				"description": "Returns an array of all regions with a host and port that a client can directly ping. Open a websocket connection to `wss://<host>:<port>/ws` and send a packet. To calculate ping, measure the time it takes to get an echo packet back.",
 				"tags": [
 					"DiscoveryV1"
 				],
@@ -2488,7 +3566,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "string"
+									"$ref": "#/components/schemas/ApiError"
 								}
 							}
 						}
@@ -2498,7 +3576,17 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "string"
+									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					},
+					"402": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
 								}
 							}
 						}
@@ -2508,7 +3596,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "string"
+									"$ref": "#/components/schemas/ApiError"
 								}
 							}
 						}
@@ -2518,7 +3606,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "string"
+									"$ref": "#/components/schemas/ApiError"
 								}
 							}
 						}
@@ -2528,7 +3616,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "string"
+									"$ref": "#/components/schemas/ApiError"
 								}
 							}
 						}
@@ -2538,7 +3626,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "string"
+									"$ref": "#/components/schemas/ApiError"
 								}
 							}
 						}
@@ -2548,7 +3636,11 @@
 					"LobbyV1"
 				],
 				"deprecated": true,
-				"security": [],
+				"security": [
+					{
+						"playerAuth": []
+					}
+				],
 				"parameters": [
 					{
 						"in": "path",
@@ -2556,14 +3648,6 @@
 						"required": true,
 						"schema": {
 							"$ref": "#/components/schemas/AppId"
-						}
-					},
-					{
-						"in": "header",
-						"name": "Authorization",
-						"required": true,
-						"schema": {
-							"type": "string"
 						}
 					},
 					{
@@ -2605,7 +3689,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "string"
+									"$ref": "#/components/schemas/ApiError"
 								}
 							}
 						}
@@ -2615,7 +3699,17 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "string"
+									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					},
+					"402": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
 								}
 							}
 						}
@@ -2625,7 +3719,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "string"
+									"$ref": "#/components/schemas/ApiError"
 								}
 							}
 						}
@@ -2635,7 +3729,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "string"
+									"$ref": "#/components/schemas/ApiError"
 								}
 							}
 						}
@@ -2645,7 +3739,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "string"
+									"$ref": "#/components/schemas/ApiError"
 								}
 							}
 						}
@@ -2655,7 +3749,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "string"
+									"$ref": "#/components/schemas/ApiError"
 								}
 							}
 						}
@@ -2665,7 +3759,11 @@
 					"LobbyV1"
 				],
 				"deprecated": true,
-				"security": [],
+				"security": [
+					{
+						"playerAuth": []
+					}
+				],
 				"parameters": [
 					{
 						"in": "path",
@@ -2673,14 +3771,6 @@
 						"required": true,
 						"schema": {
 							"$ref": "#/components/schemas/AppId"
-						}
-					},
-					{
-						"in": "header",
-						"name": "Authorization",
-						"required": true,
-						"schema": {
-							"type": "string"
 						}
 					},
 					{
@@ -2705,7 +3795,7 @@
 		},
 		"/lobby/v1/{appId}/list": {
 			"get": {
-				"operationId": "ListActivePublicLobbiesDeprecated",
+				"operationId": "ListActivePublicLobbiesDeprecatedV1",
 				"responses": {
 					"200": {
 						"description": "Ok",
@@ -2720,22 +3810,12 @@
 							}
 						}
 					},
-					"401": {
-						"description": "",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "string"
-								}
-							}
-						}
-					},
 					"404": {
 						"description": "",
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "string"
+									"$ref": "#/components/schemas/ApiError"
 								}
 							}
 						}
@@ -2753,14 +3833,6 @@
 						"required": true,
 						"schema": {
 							"$ref": "#/components/schemas/AppId"
-						}
-					},
-					{
-						"in": "header",
-						"name": "Authorization",
-						"required": true,
-						"schema": {
-							"type": "string"
 						}
 					},
 					{
@@ -2802,7 +3874,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "string"
+									"$ref": "#/components/schemas/ApiError"
 								}
 							}
 						}
@@ -2812,7 +3884,17 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "string"
+									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					},
+					"402": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
 								}
 							}
 						}
@@ -2822,7 +3904,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "string"
+									"$ref": "#/components/schemas/ApiError"
 								}
 							}
 						}
@@ -2832,7 +3914,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "string"
+									"$ref": "#/components/schemas/ApiError"
 								}
 							}
 						}
@@ -2842,7 +3924,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "string"
+									"$ref": "#/components/schemas/ApiError"
 								}
 							}
 						}
@@ -2852,7 +3934,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "string"
+									"$ref": "#/components/schemas/ApiError"
 								}
 							}
 						}
@@ -2862,7 +3944,11 @@
 					"LobbyV2"
 				],
 				"deprecated": true,
-				"security": [],
+				"security": [
+					{
+						"playerAuth": []
+					}
+				],
 				"parameters": [
 					{
 						"in": "path",
@@ -2870,14 +3956,6 @@
 						"required": true,
 						"schema": {
 							"$ref": "#/components/schemas/AppId"
-						}
-					},
-					{
-						"in": "header",
-						"name": "Authorization",
-						"required": true,
-						"schema": {
-							"type": "string"
 						}
 					},
 					{
@@ -2932,7 +4010,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "string"
+									"$ref": "#/components/schemas/ApiError"
 								}
 							}
 						}
@@ -2942,7 +4020,17 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "string"
+									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					},
+					"402": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
 								}
 							}
 						}
@@ -2952,7 +4040,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "string"
+									"$ref": "#/components/schemas/ApiError"
 								}
 							}
 						}
@@ -2962,7 +4050,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "string"
+									"$ref": "#/components/schemas/ApiError"
 								}
 							}
 						}
@@ -2972,7 +4060,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "string"
+									"$ref": "#/components/schemas/ApiError"
 								}
 							}
 						}
@@ -2982,7 +4070,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "string"
+									"$ref": "#/components/schemas/ApiError"
 								}
 							}
 						}
@@ -2992,7 +4080,11 @@
 					"LobbyV2"
 				],
 				"deprecated": true,
-				"security": [],
+				"security": [
+					{
+						"playerAuth": []
+					}
+				],
 				"parameters": [
 					{
 						"in": "path",
@@ -3000,14 +4092,6 @@
 						"required": true,
 						"schema": {
 							"$ref": "#/components/schemas/AppId"
-						}
-					},
-					{
-						"in": "header",
-						"name": "Authorization",
-						"required": true,
-						"schema": {
-							"type": "string"
 						}
 					},
 					{
@@ -3062,7 +4146,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "string"
+									"$ref": "#/components/schemas/ApiError"
 								}
 							}
 						}
@@ -3072,7 +4156,17 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "string"
+									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					},
+					"402": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
 								}
 							}
 						}
@@ -3082,7 +4176,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "string"
+									"$ref": "#/components/schemas/ApiError"
 								}
 							}
 						}
@@ -3092,7 +4186,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "string"
+									"$ref": "#/components/schemas/ApiError"
 								}
 							}
 						}
@@ -3102,7 +4196,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "string"
+									"$ref": "#/components/schemas/ApiError"
 								}
 							}
 						}
@@ -3112,7 +4206,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "string"
+									"$ref": "#/components/schemas/ApiError"
 								}
 							}
 						}
@@ -3122,7 +4216,11 @@
 					"LobbyV2"
 				],
 				"deprecated": true,
-				"security": [],
+				"security": [
+					{
+						"playerAuth": []
+					}
+				],
 				"parameters": [
 					{
 						"in": "path",
@@ -3130,14 +4228,6 @@
 						"required": true,
 						"schema": {
 							"$ref": "#/components/schemas/AppId"
-						}
-					},
-					{
-						"in": "header",
-						"name": "Authorization",
-						"required": true,
-						"schema": {
-							"type": "string"
 						}
 					},
 					{
@@ -3175,7 +4265,7 @@
 		},
 		"/lobby/v2/{appId}/create": {
 			"post": {
-				"operationId": "CreateLobby",
+				"operationId": "CreateLobbyDeprecated",
 				"responses": {
 					"201": {
 						"description": "",
@@ -3192,7 +4282,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "string"
+									"$ref": "#/components/schemas/ApiError"
 								}
 							}
 						}
@@ -3202,7 +4292,17 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "string"
+									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					},
+					"402": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
 								}
 							}
 						}
@@ -3212,7 +4312,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "string"
+									"$ref": "#/components/schemas/ApiError"
 								}
 							}
 						}
@@ -3222,7 +4322,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "string"
+									"$ref": "#/components/schemas/ApiError"
 								}
 							}
 						}
@@ -3232,7 +4332,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "string"
+									"$ref": "#/components/schemas/ApiError"
 								}
 							}
 						}
@@ -3242,17 +4342,22 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "string"
+									"$ref": "#/components/schemas/ApiError"
 								}
 							}
 						}
 					}
 				},
-				"description": "Create a new [lobby](https://hathora.dev/docs/concepts/hathora-entities#lobby) for an existing [application](https://hathora.dev/docs/concepts/hathora-entities#application) using `appId`.",
+				"description": "Create a new lobby for an [application](https://hathora.dev/docs/concepts/hathora-entities#application). A lobby object is a wrapper around a [room](https://hathora.dev/docs/concepts/hathora-entities#room) object. With a lobby, you get additional functionality like configuring the visibility of the room, managing the state of a match, and retrieving a list of public lobbies to display to players.",
 				"tags": [
 					"LobbyV2"
 				],
-				"security": [],
+				"deprecated": true,
+				"security": [
+					{
+						"playerAuth": []
+					}
+				],
 				"parameters": [
 					{
 						"in": "path",
@@ -3260,14 +4365,6 @@
 						"required": true,
 						"schema": {
 							"$ref": "#/components/schemas/AppId"
-						}
-					},
-					{
-						"in": "header",
-						"name": "Authorization",
-						"required": true,
-						"schema": {
-							"type": "string"
 						}
 					},
 					{
@@ -3284,7 +4381,7 @@
 					"content": {
 						"application/json": {
 							"schema": {
-								"$ref": "#/components/schemas/CreateLobbyRequest"
+								"$ref": "#/components/schemas/CreateLobbyParams"
 							}
 						}
 					}
@@ -3293,7 +4390,7 @@
 		},
 		"/lobby/v2/{appId}/list/public": {
 			"get": {
-				"operationId": "ListActivePublicLobbies",
+				"operationId": "ListActivePublicLobbiesDeprecatedV2",
 				"responses": {
 					"200": {
 						"description": "Ok",
@@ -3309,10 +4406,11 @@
 						}
 					}
 				},
-				"description": "Get all active [lobbies](https://hathora.dev/docs/concepts/hathora-entities#lobby) for a given [application](https://hathora.dev/docs/concepts/hathora-entities#application) using `appId`. Filter the array by optionally passing in a `region`.",
+				"description": "Get all active lobbies for a an [application](https://hathora.dev/docs/concepts/hathora-entities#application). Filter by optionally passing in a `region`. Use this endpoint to display all public lobbies that a player can join in the game client.",
 				"tags": [
 					"LobbyV2"
 				],
+				"deprecated": true,
 				"security": [],
 				"parameters": [
 					{
@@ -3354,16 +4452,17 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "string"
+									"$ref": "#/components/schemas/ApiError"
 								}
 							}
 						}
 					}
 				},
-				"description": "Get details for an existing [lobby](https://hathora.dev/docs/concepts/hathora-entities#lobby) using `appId` and `roomId`.",
+				"description": "Get details for a lobby.",
 				"tags": [
 					"LobbyV2"
 				],
+				"deprecated": true,
 				"security": [],
 				"parameters": [
 					{
@@ -3399,12 +4498,22 @@
 							}
 						}
 					},
+					"401": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					},
 					"404": {
 						"description": "",
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "string"
+									"$ref": "#/components/schemas/ApiError"
 								}
 							}
 						}
@@ -3414,19 +4523,20 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "string"
+									"$ref": "#/components/schemas/ApiError"
 								}
 							}
 						}
 					}
 				},
-				"description": "Set the state of a [lobby](https://hathora.dev/docs/concepts/hathora-entities#lobby) using `appId` and `roomId`. State is intended to be set by the server and must be smaller than 1MB.",
+				"description": "Set the state of a lobby. State is intended to be set by the server and must be smaller than 1MB. Use this endpoint to store match data like live player count to enforce max number of clients or persist end-game data (i.e. winner or final scores).",
 				"tags": [
 					"LobbyV2"
 				],
+				"deprecated": true,
 				"security": [
 					{
-						"auth0": []
+						"hathoraDevToken": []
 					}
 				],
 				"parameters": [
@@ -3452,11 +4562,287 @@
 					"content": {
 						"application/json": {
 							"schema": {
-								"$ref": "#/components/schemas/SetLobbyStateRequest"
+								"$ref": "#/components/schemas/SetLobbyStateParams"
 							}
 						}
 					}
 				}
+			}
+		},
+		"/lobby/v3/{appId}/create": {
+			"post": {
+				"operationId": "CreateLobby",
+				"responses": {
+					"201": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/LobbyV3"
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					},
+					"402": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					},
+					"429": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					}
+				},
+				"description": "Create a new lobby for an [application](https://hathora.dev/docs/concepts/hathora-entities#application). A lobby object is a wrapper around a [room](https://hathora.dev/docs/concepts/hathora-entities#room) object. With a lobby, you get additional functionality like configuring the visibility of the room, managing the state of a match, and retrieving a list of public lobbies to display to players.",
+				"tags": [
+					"LobbyV3"
+				],
+				"security": [
+					{
+						"playerAuth": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "appId",
+						"required": true,
+						"schema": {
+							"$ref": "#/components/schemas/AppId"
+						}
+					},
+					{
+						"in": "query",
+						"name": "shortCode",
+						"required": false,
+						"schema": {
+							"$ref": "#/components/schemas/ShortCode"
+						}
+					},
+					{
+						"in": "query",
+						"name": "roomId",
+						"required": false,
+						"schema": {
+							"$ref": "#/components/schemas/RoomId"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/CreateLobbyV3Params"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/lobby/v3/{appId}/list/public": {
+			"get": {
+				"operationId": "ListActivePublicLobbies",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"items": {
+										"$ref": "#/components/schemas/LobbyV3"
+									},
+									"type": "array"
+								}
+							}
+						}
+					}
+				},
+				"description": "Get all active lobbies for a given [application](https://hathora.dev/docs/concepts/hathora-entities#application). Filter the array by optionally passing in a `region`. Use this endpoint to display all public lobbies that a player can join in the game client.",
+				"tags": [
+					"LobbyV3"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "appId",
+						"required": true,
+						"schema": {
+							"$ref": "#/components/schemas/AppId"
+						}
+					},
+					{
+						"description": "If omitted, active public lobbies in all regions will be returned.",
+						"in": "query",
+						"name": "region",
+						"required": false,
+						"schema": {
+							"$ref": "#/components/schemas/Region"
+						}
+					}
+				]
+			}
+		},
+		"/lobby/v3/{appId}/info/roomid/{roomId}": {
+			"get": {
+				"operationId": "GetLobbyInfoByRoomId",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/LobbyV3"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					}
+				},
+				"description": "Get details for a lobby.",
+				"tags": [
+					"LobbyV3"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "appId",
+						"required": true,
+						"schema": {
+							"$ref": "#/components/schemas/AppId"
+						}
+					},
+					{
+						"in": "path",
+						"name": "roomId",
+						"required": true,
+						"schema": {
+							"$ref": "#/components/schemas/RoomId"
+						}
+					}
+				]
+			}
+		},
+		"/lobby/v3/{appId}/info/shortcode/{shortCode}": {
+			"get": {
+				"operationId": "GetLobbyInfoByShortCode",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/LobbyV3"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					}
+				},
+				"description": "Get details for a lobby. If 2 or more lobbies have the same `shortCode`, then the most recently created lobby will be returned.",
+				"tags": [
+					"LobbyV3"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "appId",
+						"required": true,
+						"schema": {
+							"$ref": "#/components/schemas/AppId"
+						}
+					},
+					{
+						"in": "path",
+						"name": "shortCode",
+						"required": true,
+						"schema": {
+							"$ref": "#/components/schemas/ShortCode"
+						}
+					}
+				]
 			}
 		},
 		"/logs/v1/{appId}/all": {
@@ -3474,12 +4860,22 @@
 							}
 						}
 					},
+					"401": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					},
 					"404": {
 						"description": "",
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "string"
+									"$ref": "#/components/schemas/ApiError"
 								}
 							}
 						}
@@ -3489,9 +4885,10 @@
 				"tags": [
 					"LogV1"
 				],
+				"deprecated": true,
 				"security": [
 					{
-						"auth0": []
+						"hathoraDevToken": []
 					}
 				],
 				"parameters": [
@@ -3537,10 +4934,30 @@
 					"200": {
 						"description": "Ok",
 						"content": {
-							"text/plain": {
+							"application/octet-stream": {
 								"schema": {
 									"type": "string",
 									"format": "byte"
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
 								}
 							}
 						}
@@ -3550,7 +4967,27 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "string"
+									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					},
+					"410": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
 								}
 							}
 						}
@@ -3562,7 +4999,7 @@
 				],
 				"security": [
 					{
-						"auth0": []
+						"hathoraDevToken": []
 					}
 				],
 				"parameters": [
@@ -3601,6 +5038,91 @@
 				]
 			}
 		},
+		"/logs/v1/{appId}/process/{processId}/download": {
+			"get": {
+				"operationId": "DownloadLogForProcess",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"text/plain": {
+								"schema": {
+									"type": "string",
+									"format": "byte"
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					},
+					"410": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					}
+				},
+				"description": "Download entire log file for a stopped process.",
+				"tags": [
+					"LogV1"
+				],
+				"security": [
+					{
+						"hathoraDevToken": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "appId",
+						"required": true,
+						"schema": {
+							"$ref": "#/components/schemas/AppId"
+						}
+					},
+					{
+						"in": "path",
+						"name": "processId",
+						"required": true,
+						"schema": {
+							"$ref": "#/components/schemas/ProcessId"
+						}
+					}
+				]
+			}
+		},
 		"/logs/v1/{appId}/deployment/{deploymentId}": {
 			"get": {
 				"operationId": "GetLogsForDeployment",
@@ -3616,12 +5138,22 @@
 							}
 						}
 					},
+					"401": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					},
 					"404": {
 						"description": "",
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "string"
+									"$ref": "#/components/schemas/ApiError"
 								}
 							}
 						}
@@ -3631,9 +5163,10 @@
 				"tags": [
 					"LogV1"
 				],
+				"deprecated": true,
 				"security": [
 					{
-						"auth0": []
+						"hathoraDevToken": []
 					}
 				],
 				"parameters": [
@@ -3686,12 +5219,22 @@
 							}
 						}
 					},
+					"401": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					},
 					"500": {
 						"description": "",
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "string"
+									"$ref": "#/components/schemas/ApiError"
 								}
 							}
 						}
@@ -3728,12 +5271,22 @@
 							}
 						}
 					},
+					"401": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					},
 					"404": {
 						"description": "",
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "string"
+									"$ref": "#/components/schemas/ApiError"
 								}
 							}
 						}
@@ -3743,7 +5296,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "string"
+									"$ref": "#/components/schemas/ApiError"
 								}
 							}
 						}
@@ -3753,7 +5306,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "string"
+									"$ref": "#/components/schemas/ApiError"
 								}
 							}
 						}
@@ -3765,7 +5318,7 @@
 				],
 				"security": [
 					{
-						"auth0": []
+						"hathoraDevToken": []
 					}
 				],
 				"parameters": [
@@ -3850,24 +5403,35 @@
 							}
 						}
 					},
+					"401": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					},
 					"404": {
 						"description": "",
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "string"
+									"$ref": "#/components/schemas/ApiError"
 								}
 							}
 						}
 					}
 				},
-				"description": "Returns an array of active [process](https://hathora.dev/docs/concepts/hathora-entities#process) objects for an existing [application](https://hathora.dev/docs/concepts/hathora-entities#application) using `appId`. Filter the array by optionally passing in a region.",
+				"description": "Retrieve 10 most recently started [process](https://hathora.dev/docs/concepts/hathora-entities#process) objects for an [application](https://hathora.dev/docs/concepts/hathora-entities#application). Filter the array by optionally passing in a `region`.",
 				"tags": [
 					"ProcessesV1"
 				],
+				"deprecated": true,
 				"security": [
 					{
-						"auth0": []
+						"hathoraDevToken": []
 					}
 				],
 				"parameters": [
@@ -3907,24 +5471,35 @@
 							}
 						}
 					},
+					"401": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					},
 					"404": {
 						"description": "",
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "string"
+									"$ref": "#/components/schemas/ApiError"
 								}
 							}
 						}
 					}
 				},
-				"description": "Returns an array of stopped [process](https://hathora.dev/docs/concepts/hathora-entities#process) objects for an existing [application](https://hathora.dev/docs/concepts/hathora-entities#application) using `appId`. Filter the array by optionally passing in a region.",
+				"description": "Retrieve 10 most recently stopped [process](https://hathora.dev/docs/concepts/hathora-entities#process) objects for an [application](https://hathora.dev/docs/concepts/hathora-entities#application). Filter the array by optionally passing in a `region`.",
 				"tags": [
 					"ProcessesV1"
 				],
+				"deprecated": true,
 				"security": [
 					{
-						"auth0": []
+						"hathoraDevToken": []
 					}
 				],
 				"parameters": [
@@ -3949,7 +5524,7 @@
 		},
 		"/processes/v1/{appId}/info/{processId}": {
 			"get": {
-				"operationId": "GetProcessInfo",
+				"operationId": "GetProcessInfoDeprecated",
 				"responses": {
 					"200": {
 						"description": "Ok",
@@ -3961,24 +5536,45 @@
 							}
 						}
 					},
+					"401": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					},
 					"404": {
 						"description": "",
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "string"
+									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
 								}
 							}
 						}
 					}
 				},
-				"description": "Get details for an existing [process](https://hathora.dev/docs/concepts/hathora-entities#process) using `appId` and `processId`.",
+				"description": "Get details for a [process](https://hathora.dev/docs/concepts/hathora-entities#process).",
 				"tags": [
 					"ProcessesV1"
 				],
+				"deprecated": true,
 				"security": [
 					{
-						"auth0": []
+						"hathoraDevToken": []
 					}
 				],
 				"parameters": [
@@ -3996,6 +5592,302 @@
 						"required": true,
 						"schema": {
 							"$ref": "#/components/schemas/ProcessId"
+						}
+					}
+				]
+			}
+		},
+		"/processes/v2/{appId}/info/{processId}": {
+			"get": {
+				"operationId": "GetProcessInfo",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ProcessV2"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					}
+				},
+				"description": "Get details for a [process](https://hathora.dev/docs/concepts/hathora-entities#process).",
+				"tags": [
+					"ProcessesV2"
+				],
+				"security": [
+					{
+						"hathoraDevToken": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "appId",
+						"required": true,
+						"schema": {
+							"$ref": "#/components/schemas/AppId"
+						}
+					},
+					{
+						"in": "path",
+						"name": "processId",
+						"required": true,
+						"schema": {
+							"$ref": "#/components/schemas/ProcessId"
+						}
+					}
+				]
+			}
+		},
+		"/processes/v2/{appId}/list/latest": {
+			"get": {
+				"operationId": "GetLatestProcesses",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"items": {
+										"$ref": "#/components/schemas/ProcessV2"
+									},
+									"type": "array"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					}
+				},
+				"description": "Retrieve the 10 most recent [processes](https://hathora.dev/docs/concepts/hathora-entities#process) objects for an [application](https://hathora.dev/docs/concepts/hathora-entities#application). Filter the array by optionally passing in a `status` or `region`.",
+				"tags": [
+					"ProcessesV2"
+				],
+				"security": [
+					{
+						"hathoraDevToken": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "appId",
+						"required": true,
+						"schema": {
+							"$ref": "#/components/schemas/AppId"
+						}
+					},
+					{
+						"in": "query",
+						"name": "status",
+						"required": false,
+						"schema": {
+							"type": "array",
+							"items": {
+								"$ref": "#/components/schemas/ProcessStatus"
+							}
+						}
+					},
+					{
+						"in": "query",
+						"name": "region",
+						"required": false,
+						"schema": {
+							"type": "array",
+							"items": {
+								"$ref": "#/components/schemas/Region"
+							}
+						}
+					}
+				]
+			}
+		},
+		"/processes/v2/{appId}/stop/{processId}": {
+			"post": {
+				"operationId": "StopProcess",
+				"responses": {
+					"204": {
+						"description": "No content"
+					},
+					"401": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					}
+				},
+				"description": "Stops a [process](https://hathora.dev/docs/concepts/hathora-entities#process) immediately.",
+				"tags": [
+					"ProcessesV2"
+				],
+				"security": [
+					{
+						"hathoraDevToken": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "appId",
+						"required": true,
+						"schema": {
+							"$ref": "#/components/schemas/AppId"
+						}
+					},
+					{
+						"in": "path",
+						"name": "processId",
+						"required": true,
+						"schema": {
+							"$ref": "#/components/schemas/ProcessId"
+						}
+					}
+				]
+			}
+		},
+		"/processes/v2/{appId}/create/{region}": {
+			"post": {
+				"operationId": "CreateProcess",
+				"responses": {
+					"201": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ProcessV2"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					},
+					"402": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					}
+				},
+				"description": "Creates a [process](https://hathora.dev/docs/concepts/hathora-entities#process) without a room. Use this to pre-allocate processes ahead of time so that subsequent room assignment via [CreateRoom()](https://hathora.dev/api#tag/RoomV2/operation/CreateRoom) can be instant.",
+				"tags": [
+					"ProcessesV2"
+				],
+				"security": [
+					{
+						"hathoraDevToken": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "appId",
+						"required": true,
+						"schema": {
+							"$ref": "#/components/schemas/AppId"
+						}
+					},
+					{
+						"in": "path",
+						"name": "region",
+						"required": true,
+						"schema": {
+							"$ref": "#/components/schemas/Region"
 						}
 					}
 				]
@@ -4020,7 +5912,17 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "string"
+									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
 								}
 							}
 						}
@@ -4030,7 +5932,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "string"
+									"$ref": "#/components/schemas/ApiError"
 								}
 							}
 						}
@@ -4040,7 +5942,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "string"
+									"$ref": "#/components/schemas/ApiError"
 								}
 							}
 						}
@@ -4050,7 +5952,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "string"
+									"$ref": "#/components/schemas/ApiError"
 								}
 							}
 						}
@@ -4060,7 +5962,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "string"
+									"$ref": "#/components/schemas/ApiError"
 								}
 							}
 						}
@@ -4072,7 +5974,7 @@
 				"deprecated": true,
 				"security": [
 					{
-						"auth0": []
+						"hathoraDevToken": []
 					}
 				],
 				"parameters": [
@@ -4098,7 +6000,7 @@
 					"content": {
 						"application/json": {
 							"schema": {
-								"$ref": "#/components/schemas/CreateRoomRequest"
+								"$ref": "#/components/schemas/CreateRoomParams"
 							}
 						}
 					}
@@ -4119,12 +6021,22 @@
 							}
 						}
 					},
+					"401": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					},
 					"404": {
 						"description": "",
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "string"
+									"$ref": "#/components/schemas/ApiError"
 								}
 							}
 						}
@@ -4136,7 +6048,7 @@
 				"deprecated": true,
 				"security": [
 					{
-						"auth0": []
+						"hathoraDevToken": []
 					}
 				],
 				"parameters": [
@@ -4176,12 +6088,22 @@
 							}
 						}
 					},
+					"401": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					},
 					"404": {
 						"description": "",
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "string"
+									"$ref": "#/components/schemas/ApiError"
 								}
 							}
 						}
@@ -4193,7 +6115,7 @@
 				"deprecated": true,
 				"security": [
 					{
-						"auth0": []
+						"hathoraDevToken": []
 					}
 				],
 				"parameters": [
@@ -4233,12 +6155,22 @@
 							}
 						}
 					},
+					"401": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					},
 					"404": {
 						"description": "",
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "string"
+									"$ref": "#/components/schemas/ApiError"
 								}
 							}
 						}
@@ -4250,7 +6182,7 @@
 				"deprecated": true,
 				"security": [
 					{
-						"auth0": []
+						"hathoraDevToken": []
 					}
 				],
 				"parameters": [
@@ -4280,12 +6212,22 @@
 					"204": {
 						"description": "No content"
 					},
+					"401": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					},
 					"404": {
 						"description": "",
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "string"
+									"$ref": "#/components/schemas/ApiError"
 								}
 							}
 						}
@@ -4295,7 +6237,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "string"
+									"$ref": "#/components/schemas/ApiError"
 								}
 							}
 						}
@@ -4307,7 +6249,7 @@
 				"deprecated": true,
 				"security": [
 					{
-						"auth0": []
+						"hathoraDevToken": []
 					}
 				],
 				"parameters": [
@@ -4337,12 +6279,22 @@
 					"204": {
 						"description": "No content"
 					},
+					"401": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					},
 					"404": {
 						"description": "",
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "string"
+									"$ref": "#/components/schemas/ApiError"
 								}
 							}
 						}
@@ -4352,7 +6304,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "string"
+									"$ref": "#/components/schemas/ApiError"
 								}
 							}
 						}
@@ -4364,7 +6316,7 @@
 				"deprecated": true,
 				"security": [
 					{
-						"auth0": []
+						"hathoraDevToken": []
 					}
 				],
 				"parameters": [
@@ -4406,7 +6358,17 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "string"
+									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					},
+					"402": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
 								}
 							}
 						}
@@ -4416,7 +6378,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "string"
+									"$ref": "#/components/schemas/ApiError"
 								}
 							}
 						}
@@ -4426,7 +6388,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "string"
+									"$ref": "#/components/schemas/ApiError"
 								}
 							}
 						}
@@ -4466,7 +6428,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/ConnectionInfoV2"
+									"$ref": "#/components/schemas/CreateRoomResponse"
 								}
 							}
 						}
@@ -4476,7 +6438,17 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "string"
+									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
 								}
 							}
 						}
@@ -4486,7 +6458,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "string"
+									"$ref": "#/components/schemas/ApiError"
 								}
 							}
 						}
@@ -4496,7 +6468,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "string"
+									"$ref": "#/components/schemas/ApiError"
 								}
 							}
 						}
@@ -4506,7 +6478,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "string"
+									"$ref": "#/components/schemas/ApiError"
 								}
 							}
 						}
@@ -4516,19 +6488,19 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "string"
+									"$ref": "#/components/schemas/ApiError"
 								}
 							}
 						}
 					}
 				},
-				"description": "Create a new [room](https://hathora.dev/docs/concepts/hathora-entities#room) for an existing [application](https://hathora.dev/docs/concepts/hathora-entities#application) using `appId` and `region`.",
+				"description": "Create a new [room](https://hathora.dev/docs/concepts/hathora-entities#room) for an existing [application](https://hathora.dev/docs/concepts/hathora-entities#application). Poll the [`GetConnectionInfo()`](https://hathora.dev/api#tag/RoomV2/operation/GetConnectionInfo) endpoint to get connection details for an active room.",
 				"tags": [
 					"RoomV2"
 				],
 				"security": [
 					{
-						"auth0": []
+						"hathoraDevToken": []
 					}
 				],
 				"parameters": [
@@ -4554,7 +6526,7 @@
 					"content": {
 						"application/json": {
 							"schema": {
-								"$ref": "#/components/schemas/CreateRoomRequest"
+								"$ref": "#/components/schemas/CreateRoomParams"
 							}
 						}
 					}
@@ -4575,24 +6547,34 @@
 							}
 						}
 					},
+					"401": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					},
 					"404": {
 						"description": "",
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "string"
+									"$ref": "#/components/schemas/ApiError"
 								}
 							}
 						}
 					}
 				},
-				"description": "Get details for an existing [room](https://hathora.dev/docs/concepts/hathora-entities#room) using `appId` and `roomId`.",
+				"description": "Retreive current and historical allocation data for a [room](https://hathora.dev/docs/concepts/hathora-entities#room).",
 				"tags": [
 					"RoomV2"
 				],
 				"security": [
 					{
-						"auth0": []
+						"hathoraDevToken": []
 					}
 				],
 				"parameters": [
@@ -4632,24 +6614,34 @@
 							}
 						}
 					},
+					"401": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					},
 					"404": {
 						"description": "",
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "string"
+									"$ref": "#/components/schemas/ApiError"
 								}
 							}
 						}
 					}
 				},
-				"description": "Get all active [rooms](https://hathora.dev/docs/concepts/hathora-entities#room) for a given [process](https://hathora.dev/docs/concepts/hathora-entities#process) using `appId` and `processId`.",
+				"description": "Get all active [rooms](https://hathora.dev/docs/concepts/hathora-entities#room) for a given [process](https://hathora.dev/docs/concepts/hathora-entities#process).",
 				"tags": [
 					"RoomV2"
 				],
 				"security": [
 					{
-						"auth0": []
+						"hathoraDevToken": []
 					}
 				],
 				"parameters": [
@@ -4689,24 +6681,34 @@
 							}
 						}
 					},
+					"401": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					},
 					"404": {
 						"description": "",
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "string"
+									"$ref": "#/components/schemas/ApiError"
 								}
 							}
 						}
 					}
 				},
-				"description": "Get all inactive [rooms](https://hathora.dev/docs/concepts/hathora-entities#room) for a given [process](https://hathora.dev/docs/concepts/hathora-entities#process) using `appId` and `processId`.",
+				"description": "Get all inactive [rooms](https://hathora.dev/docs/concepts/hathora-entities#room) for a given [process](https://hathora.dev/docs/concepts/hathora-entities#process).",
 				"tags": [
 					"RoomV2"
 				],
 				"security": [
 					{
-						"auth0": []
+						"hathoraDevToken": []
 					}
 				],
 				"parameters": [
@@ -4736,12 +6738,22 @@
 					"204": {
 						"description": "No content"
 					},
+					"401": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					},
 					"404": {
 						"description": "",
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "string"
+									"$ref": "#/components/schemas/ApiError"
 								}
 							}
 						}
@@ -4751,19 +6763,19 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "string"
+									"$ref": "#/components/schemas/ApiError"
 								}
 							}
 						}
 					}
 				},
-				"description": "Destroy a [room](https://hathora.dev/docs/concepts/hathora-entities#room) using `appId` and `roomId`. All associated metadata is deleted.",
+				"description": "Destroy a [room](https://hathora.dev/docs/concepts/hathora-entities#room). All associated metadata is deleted.",
 				"tags": [
 					"RoomV2"
 				],
 				"security": [
 					{
-						"auth0": []
+						"hathoraDevToken": []
 					}
 				],
 				"parameters": [
@@ -4793,12 +6805,22 @@
 					"204": {
 						"description": "No content"
 					},
+					"401": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					},
 					"404": {
 						"description": "",
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "string"
+									"$ref": "#/components/schemas/ApiError"
 								}
 							}
 						}
@@ -4808,19 +6830,19 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "string"
+									"$ref": "#/components/schemas/ApiError"
 								}
 							}
 						}
 					}
 				},
-				"description": "Suspend a [room](https://hathora.dev/docs/concepts/hathora-entities#room) using `appId` and `roomId`. The room is unallocated from the process but can be rescheduled later using the same `roomId`.",
+				"description": "Suspend a [room](https://hathora.dev/docs/concepts/hathora-entities#room). The room is unallocated from the process but can be rescheduled later using the same `roomId`.",
 				"tags": [
 					"RoomV2"
 				],
 				"security": [
 					{
-						"auth0": []
+						"hathoraDevToken": []
 					}
 				],
 				"parameters": [
@@ -4862,7 +6884,17 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "string"
+									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					},
+					"402": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
 								}
 							}
 						}
@@ -4872,7 +6904,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "string"
+									"$ref": "#/components/schemas/ApiError"
 								}
 							}
 						}
@@ -4882,13 +6914,13 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "string"
+									"$ref": "#/components/schemas/ApiError"
 								}
 							}
 						}
 					}
 				},
-				"description": "Get connection details to a [room](https://hathora.dev/docs/concepts/hathora-entities#room) using `appId` and `roomId`. Clients can call this endpoint without authentication.",
+				"description": "Poll this endpoint to get connection details to a [room](https://hathora.dev/docs/concepts/hathora-entities#room). Clients can call this endpoint without authentication.",
 				"tags": [
 					"RoomV2"
 				],
@@ -4912,6 +6944,278 @@
 					}
 				]
 			}
+		},
+		"/rooms/v2/{appId}/update/{roomId}": {
+			"post": {
+				"operationId": "UpdateRoomConfig",
+				"responses": {
+					"204": {
+						"description": "No content"
+					},
+					"401": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"RoomV2"
+				],
+				"security": [
+					{
+						"hathoraDevToken": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "appId",
+						"required": true,
+						"schema": {
+							"$ref": "#/components/schemas/AppId"
+						}
+					},
+					{
+						"in": "path",
+						"name": "roomId",
+						"required": true,
+						"schema": {
+							"$ref": "#/components/schemas/RoomId"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/UpdateRoomConfigParams"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/tokens/v1/orgs/{orgId}": {
+			"get": {
+				"operationId": "GetOrgTokens",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ListOrgTokens"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					}
+				},
+				"description": "List all organization tokens for a given org.",
+				"tags": [
+					"OrgTokensV1"
+				],
+				"security": [
+					{
+						"hathoraDevToken": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "orgId",
+						"required": true,
+						"schema": {
+							"$ref": "#/components/schemas/OrgId"
+						}
+					}
+				]
+			}
+		},
+		"/tokens/v1/orgs/{orgId}/create": {
+			"post": {
+				"operationId": "CreateOrgToken",
+				"responses": {
+					"201": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/CreatedOrgToken"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					}
+				},
+				"description": "Create a new organization token.",
+				"tags": [
+					"OrgTokensV1"
+				],
+				"security": [
+					{
+						"hathoraDevToken": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "orgId",
+						"required": true,
+						"schema": {
+							"$ref": "#/components/schemas/OrgId"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/CreateOrgToken"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/tokens/v1/orgs/{orgId}/tokens/{orgTokenId}/revoke": {
+			"post": {
+				"operationId": "RevokeOrgToken",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "boolean"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					}
+				},
+				"description": "Revoke an organization token.",
+				"tags": [
+					"OrgTokensV1"
+				],
+				"security": [
+					{
+						"hathoraDevToken": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "orgId",
+						"required": true,
+						"schema": {
+							"$ref": "#/components/schemas/OrgId"
+						}
+					},
+					{
+						"in": "path",
+						"name": "orgTokenId",
+						"required": true,
+						"schema": {
+							"$ref": "#/components/schemas/OrgId"
+						}
+					}
+				]
+			}
 		}
 	},
 	"servers": [
@@ -4929,39 +7233,82 @@
 		},
 		{
 			"name": "AuthV1",
-			"description": "Operations that allow you to configure authentication for your [applications](https://hathora.dev/docs/concepts/hathora-entities#application)."
+			"description": "Operations that allow you to generate a Hathora-signed [JSON web token (JWT)](https://jwt.io/) for [player authentication](https://hathora.dev/docs/lobbies-and-matchmaking/auth-service)."
+		},
+		{
+			"name": "BillingV1",
+			"description": " "
 		},
 		{
 			"name": "BuildV1",
-			"description": "Operations that allow you create and manage your [build](https://hathora.dev/docs/concepts/hathora-entities#build)."
+			"description": "Operations that allow you create and manage your [builds](https://hathora.dev/docs/concepts/hathora-entities#build)."
+		},
+		{
+			"name": "DeploymentV2",
+			"description": "Operations that allow you configure and manage an application's [build](https://hathora.dev/docs/concepts/hathora-entities#build) at runtime."
 		},
 		{
 			"name": "DeploymentV1",
-			"description": "Operations that allow you configure and manage an application's [build](https://hathora.dev/docs/concepts/hathora-entities#build) at runtime."
+			"description": "Deprecated. Use [DeploymentV2](https://hathora.dev/api#tag/DeploymentV2)."
 		},
 		{
 			"name": "DiscoveryV1",
 			"description": "Service that allows clients to directly ping all Hathora regions to get latency information"
 		},
 		{
+			"name": "LobbyV3",
+			"description": "Operations to create and manage lobbies using our [Lobby Service](https://hathora.dev/docs/lobbies-and-matchmaking/lobby-service)."
+		},
+		{
 			"name": "LobbyV2",
-			"description": "Operations to create and manage [lobbies](https://hathora.dev/docs/concepts/hathora-entities#lobby)."
+			"description": "Deprecated. Use [LobbyV3](https://hathora.dev/api#tag/LobbyV3)."
+		},
+		{
+			"name": "LobbyV1",
+			"description": "Deprecated. Use [LobbyV3](https://hathora.dev/api#tag/LobbyV3)."
 		},
 		{
 			"name": "LogV1",
 			"description": "Operations to get logs by [applications](https://hathora.dev/docs/concepts/hathora-entities#application), [processes](https://hathora.dev/docs/concepts/hathora-entities#process), and [deployments](https://hathora.dev/docs/concepts/hathora-entities#deployment). We store 20GB of logs data."
 		},
 		{
+			"name": "ManagementV1",
+			"description": " "
+		},
+		{
 			"name": "MetricsV1",
 			"description": "Operations to get metrics by [process](https://hathora.dev/docs/concepts/hathora-entities#process). We store 72 hours of metrics data."
 		},
 		{
-			"name": "ProcessesV1",
+			"name": "ProcessesV2",
 			"description": "Operations to get data on active and stopped [processes](https://hathora.dev/docs/concepts/hathora-entities#process)."
+		},
+		{
+			"name": "ProcessesV1",
+			"description": "Deprecated. Use [ProcessesV2](https://hathora.dev/api#tag/ProcessesV2)."
 		},
 		{
 			"name": "RoomV2",
 			"description": "Operations to create, manage, and connect to [rooms](https://hathora.dev/docs/concepts/hathora-entities#room)."
+		},
+		{
+			"name": "RoomV1",
+			"description": "Deprecated. Use [RoomV2](https://hathora.dev/api#tag/RoomV2)."
+		},
+		{
+			"name": "OrgTokensV1",
+			"description": " "
 		}
-	]
+	],
+	"x-speakeasy-globals": {
+		"parameters": [
+			{
+				"in": "path",
+				"name": "appId",
+				"schema": {
+					"$ref": "#/components/schemas/AppId"
+				}
+			}
+		]
+	}
 }

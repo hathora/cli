@@ -25,7 +25,7 @@ export const createBuild = async (
 
 		const createResponse = await client.createBuild({
 			appId: args.appId,
-			createBuildRequest: { buildTag: args.buildTag },
+			createBuildParams: { buildTag: args.buildTag },
 		});
 		const buildResponse = await client.runBuildRaw({
 			appId: args.appId,

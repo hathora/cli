@@ -17,8 +17,9 @@ export const createDeployment = async (
 ): Promise<Deployment> => {
 	const client = getDeploymentApiClient(args.token);
 	try {
-		const deployments = await client.getDeployments({ appId: args.appId });
-		const lastDeployment = deployments.at(0);
+		const lastDeployment = await client.getLatestDeploymentDeprecated({
+			appId: args.appId,
+		});
 
 		if (
 			lastDeployment === undefined &&
@@ -31,7 +32,7 @@ export const createDeployment = async (
 			throw new Error("All args must be present for the initial deployment");
 		}
 
-		const deployment = await client.createDeployment({
+		const deployment = await client.createDeploymentDeprecated({
 			appId: args.appId,
 			buildId: args.buildId ?? lastDeployment!.buildId,
 			deploymentConfig: {
@@ -75,7 +76,8 @@ export const createDeploymentCommand: CommandModule<
 	}
 > = {
 	command: "create",
-	describe: "Create a new deployment to configure a build at runtime. This will not generate a new build image",
+	describe:
+		"Create a new deployment to configure a build at runtime. This will not generate a new build image",
 	builder: {
 		buildId: {
 			type: "number",
@@ -93,12 +95,14 @@ export const createDeploymentCommand: CommandModule<
 		planName: {
 			type: "string",
 			choices: ["tiny", "small", "medium", "large"],
-			describe: "A plan defines how much CPU and memory is required to run an instance of your game server",
+			describe:
+				"A plan defines how much CPU and memory is required to run an instance of your game server",
 		},
 		transportType: {
 			type: "string",
 			choices: ["tcp", "udp", "tls"],
-			describe: "Specifies the underlying communication protocol to the exposed port",
+			describe:
+				"Specifies the underlying communication protocol to the exposed port",
 		},
 		containerPort: {
 			type: "number",
@@ -114,7 +118,6 @@ export const createDeploymentCommand: CommandModule<
 			demandOption: true,
 			describe: "Hathora developer token (required only for CI environments)",
 		},
-
 	},
 	handler: async (args) => {
 		const deployment = await createDeployment(args);
