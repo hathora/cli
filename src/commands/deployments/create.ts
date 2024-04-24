@@ -17,19 +17,18 @@ export const createDeployment = async (
 ): Promise<Deployment> => {
 	const client = getDeploymentApiClient(args.token);
 	try {
-		const lastDeployment = await client.getLatestDeploymentDeprecated({
-			appId: args.appId,
-		});
-
+		let lastDeployment: Deployment | undefined;
 		if (
-			lastDeployment === undefined &&
-			(args.buildId === undefined ||
-				args.roomsPerProcess === undefined ||
-				args.planName === undefined ||
-				args.transportType === undefined ||
-				args.containerPort === undefined)
+			args.buildId === undefined ||
+			args.roomsPerProcess === undefined ||
+			args.planName === undefined ||
+			args.transportType === undefined ||
+			args.containerPort === undefined
 		) {
-			throw new Error("All args must be present for the initial deployment");
+			console.log("Some args missing, copying values from the last deployment");
+			lastDeployment = await client.getLatestDeploymentDeprecated({
+				appId: args.appId,
+			});
 		}
 
 		const deployment = await client.createDeploymentDeprecated({
