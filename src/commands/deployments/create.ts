@@ -26,9 +26,13 @@ export const createDeployment = async (
 			args.containerPort === undefined
 		) {
 			console.log("Some args missing, copying values from the last deployment");
-			lastDeployment = await client.getLatestDeploymentDeprecated({
-				appId: args.appId,
-			});
+			try {
+				lastDeployment = await client.getLatestDeploymentDeprecated({
+					appId: args.appId,
+				});
+			} catch (e) {
+				throw new Error("No previous deployment found");
+			}
 		}
 
 		const deployment = await client.createDeploymentDeprecated({
