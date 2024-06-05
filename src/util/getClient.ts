@@ -17,6 +17,7 @@ import {
 	BuildV1Api,
 	Configuration,
 	DeploymentV1Api,
+	DeploymentV2Api,
 	LogV1Api,
 	ProcessesV1Api,
 	RoomV1Api,
@@ -46,7 +47,7 @@ export function getAppApiClient(token: string) {
 }
 
 export function getDeploymentApiClient(token: string) {
-	return new DeploymentV1Api(
+	return new DeploymentV2Api(
 		new Configuration({
 			headers: {
 				Authorization: `Bearer ${token}`,

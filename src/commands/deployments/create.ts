@@ -1,7 +1,14 @@
 import { ArgumentsCamelCase, CommandModule } from "yargs";
 import { ERROR_MESSAGES } from "../../util/errors";
 import { getDeploymentApiClient } from "../../util/getClient";
-import { Deployment, ResponseError } from "../../../sdk-client";
+import {  DeploymentV2, PlanName, ResponseError } from "../../../sdk-client";
+
+const CONTAINER_SIZES: Record<PlanName, { cpu: number; memory: number }> = {
+	tiny: { cpu: 0.5, memory: 1024 },
+	small: { cpu: 1, memory: 2048 },
+	medium: { cpu: 2, memory: 4096 },
+	large: { cpu: 4, memory: 8192 },
+};
 
 export const createDeployment = async (
 	args: ArgumentsCamelCase<{
@@ -9,15 +16,15 @@ export const createDeployment = async (
 		token: string;
 		buildId?: number | undefined;
 		roomsPerProcess?: number | undefined;
-		planName?: "tiny" | "small" | "medium" | "large" | undefined;
+		planName?: PlanName;
 		transportType?: "tcp" | "udp" | "tls" | undefined;
 		containerPort?: number | undefined;
 		env?: string | undefined;
 	}>
-): Promise<Deployment> => {
+): Promise<DeploymentV2> => {
 	const client = getDeploymentApiClient(args.token);
 	try {
-		let lastDeployment: Deployment | undefined;
+		let lastDeployment: DeploymentV2 | undefined;
 		if (
 			args.buildId === undefined ||
 			args.roomsPerProcess === undefined ||
@@ -27,7 +34,7 @@ export const createDeployment = async (
 		) {
 			console.log("Some args missing, copying values from the last deployment");
 			try {
-				lastDeployment = await client.getLatestDeploymentDeprecated({
+				lastDeployment = await client.getLatestDeployment({
 					appId: args.appId,
 				});
 			} catch (e) {
@@ -35,21 +42,26 @@ export const createDeployment = async (
 			}
 		}
 
-		const deployment = await client.createDeploymentDeprecated({
+		const requestedCPU = args.planName ? CONTAINER_SIZES[args.planName].cpu : undefined;
+		const requestedMemoryMB = args.planName ? CONTAINER_SIZES[args.planName].memory : undefined;
+
+		const deployment = await client.createDeployment({
 			appId: args.appId,
 			buildId: args.buildId ?? lastDeployment!.buildId,
-			deploymentConfig: {
+			deploymentConfigV2: {
 				roomsPerProcess:
 					args.roomsPerProcess ?? lastDeployment!.roomsPerProcess,
-				planName: args.planName ?? lastDeployment!.planName,
-				transportType: args.transportType ?? lastDeployment!.transportType,
-				containerPort: args.containerPort ?? lastDeployment!.containerPort,
+				requestedCPU: requestedCPU ?? lastDeployment!.requestedCPU,
+				requestedMemoryMB: requestedMemoryMB ?? lastDeployment!.requestedMemoryMB,
+				transportType: args.transportType ?? lastDeployment!.defaultContainerPort.transportType,
+				containerPort: args.containerPort ?? lastDeployment!.defaultContainerPort.port,
 				env:
 					args.env !== undefined
 						? JSON.parse(args.env)
 						: lastDeployment?.env ?? [],
 				additionalContainerPorts:
 					lastDeployment?.additionalContainerPorts ?? [],
+				idleTimeoutEnabled: lastDeployment?.idleTimeoutEnabled ?? lastDeployment?.idleTimeoutEnabled ?? true,
 			},
 		});
 		return deployment;
@@ -72,7 +84,7 @@ export const createDeploymentCommand: CommandModule<
 		token: string;
 		buildId?: number;
 		roomsPerProcess?: number;
-		planName?: "tiny" | "small" | "medium" | "large";
+		planName?: PlanName;
 		transportType?: "tcp" | "udp" | "tls";
 		containerPort?: number;
 		env?: string;
