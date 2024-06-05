@@ -16,11 +16,9 @@ import {
 	AppV1Api,
 	BuildV1Api,
 	Configuration,
-	DeploymentV1Api,
 	DeploymentV2Api,
 	LogV1Api,
 	ProcessesV1Api,
-	RoomV1Api,
 	RoomV2Api,
 } from "../../sdk-client";
 
