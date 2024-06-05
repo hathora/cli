@@ -16,7 +16,7 @@ export const createDeployment = async (
 		token: string;
 		buildId?: number | undefined;
 		roomsPerProcess?: number | undefined;
-		planName?: PlanName;
+		planName?: PlanName | undefined;
 		transportType?: "tcp" | "udp" | "tls" | undefined;
 		containerPort?: number | undefined;
 		env?: string | undefined;
