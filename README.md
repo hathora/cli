@@ -1,6 +1,6 @@
 # [Deprecated] hathora cli
 
-This is no longer supported, please using Hathora's [new CLI]((https://github.com/hathora/ci)) instead.
+This is no longer supported, please using Hathora's [new CLI](https://github.com/hathora/ci) instead.
 
 ## Overview
 
